@@ -1,0 +1,136 @@
+nm: '../../src/libstorage.a': No such file
+Makefile:43: warning: overriding commands for target `createkeys'
+../Makefile.common:33: warning: ignoring old commands for target `createkeys'
+cd ../../src/ && make server
+make[1]: Entering directory `/nfs/ug/cadXYZ/output/asst-3/marking/storage-asst3_cd-037_77ae390394e49cc37bd5626e94003cec/build/storage-asst3/src'
+cc -g -Wall -c server.c -o server.o
+cc -g -Wall -c utils.c -o utils.o
+cc -g -Wall server.o utils.o -o server -lcrypt
+make[1]: Leaving directory `/nfs/ug/cadXYZ/output/asst-3/marking/storage-asst3_cd-037_77ae390394e49cc37bd5626e94003cec/build/storage-asst3/src'
+ln -sf ../../src/server
+ln -s ../../src/storage.h
+cd ../../src/ && make libstorage.a
+make[1]: Entering directory `/nfs/ug/cadXYZ/output/asst-3/marking/storage-asst3_cd-037_77ae390394e49cc37bd5626e94003cec/build/storage-asst3/src'
+cc -g -Wall -c storage.c -o storage.o
+storage.c: In function 'storage_connect':
+storage.c:131:12: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+storage.c: In function 'storage_auth':
+storage.c:156:9: warning: return makes integer from pointer without a cast [enabled by default]
+storage.c:163:9: warning: return makes integer from pointer without a cast [enabled by default]
+storage.c:174:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+storage.c: In function 'storage_get':
+storage.c:222:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+storage.c: In function 'storage_set':
+storage.c:293:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+storage.c: In function 'storage_query':
+storage.c:374:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+storage.c: In function 'storage_disconnect':
+storage.c:469:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+ar rcs libstorage.a storage.o utils.o
+make[1]: Leaving directory `/nfs/ug/cadXYZ/output/asst-3/marking/storage-asst3_cd-037_77ae390394e49cc37bd5626e94003cec/build/storage-asst3/src'
+make createquerystub
+make[1]: Entering directory `/nfs/ug/cadXYZ/output/asst-3/marking/storage-asst3_cd-037_77ae390394e49cc37bd5626e94003cec/build/storage-asst3/mark/a3'
+Makefile:43: warning: overriding commands for target `createkeys'
+../Makefile.common:33: warning: ignoring old commands for target `createkeys'
+echo "" > querystub.c
+make[1]: Leaving directory `/nfs/ug/cadXYZ/output/asst-3/marking/storage-asst3_cd-037_77ae390394e49cc37bd5626e94003cec/build/storage-asst3/mark/a3'
+cc -g -Wall -DMARKING_PROG -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I ../../src main.c ../../src/libstorage.a /usr/lib/x86_64-linux-gnu/libm.so /usr/lib/libcheck.a /usr/lib/x86_64-linux-gnu/libcrypt.so /usr/lib/x86_64-linux-gnu/libcrypto.so /usr/lib/x86_64-linux-gnu/libglib-2.0.so querystub.c -o main
+main.c: In function 'test_setup_simple_populate':
+main.c:224:6: warning: variable 'status' set but not used [-Wunused-but-set-variable]
+main.c: In function 'test_setup_complex_populate':
+main.c:269:6: warning: variable 'status' set but not used [-Wunused-but-set-variable]
+rm -rf ./mydata
+for conf in `ls *.conf`; do sed -i -e "1,/server_port/s/server_port.*/server_port 6877/" "$conf"; done
+env CK_VERBOSITY=verbose ./main 6877
+Using server port: 6877.
+Running suite(s): a3
+96%: Checks: 88, Failures: 3, Errors: 0
+main.c:326:P:sanity:test_sanity_filemod:0: Passed
+main.c:341:P:configerror:test_configerror_nocomma:0: Passed
+main.c:348:P:configerror:test_configerror_negsize:0: Passed
+main.c:355:P:configerror:test_configerror_badcol:0: Passed
+main.c:362:P:configerror:test_configerror_badtype:0: Passed
+main.c:369:P:configerror:test_configerror_badtype2:0: Passed
+main.c:376:P:configerror:test_configerror_notype:0: Passed
+main.c:383:P:configerror:test_configerror_notable:0: Passed
+main.c:393:P:configerror:test_configerror_duplicate_columns:0: Passed
+main.c:400:P:configerror:test_configerror_duplicate_columntypes:0: Passed
+main.c:416:P:config:test_config_onetable:0: Passed
+main.c:423:P:config:test_config_simpletables:0: Passed
+main.c:430:P:config:test_config_complextables:0: Passed
+main.c:452:P:conn:test_conn_basic:0: Passed
+main.c:461:P:conn:test_conn_connectnoserver:0: Passed
+main.c:469:P:conninvalid:test_conninvalid_connectinvalidparam:0: Passed
+main.c:477:P:conninvalid:test_conninvalid_disconnectinvalidparam:0: Passed
+main.c:495:P:getinvalid:test_getinvalid_invalidtable:0: Passed
+main.c:505:P:getinvalid:test_getinvalid_invalidkey:0: Passed
+main.c:513:P:getinvalid:test_getinvalid_invalidrecord:0: Passed
+main.c:522:P:getinvalid:test_getinvalid_invalidconn:0: Passed
+main.c:531:P:getinvalid:test_getinvalid_badtable:0: Passed
+main.c:540:P:getinvalid:test_getinvalid_badkey:0: Passed
+main.c:549:P:getmissing:test_getmissing_missingtable:0: Passed
+main.c:558:P:getmissing:test_getmissing_missingkey:0: Passed
+main.c:576:P:setinvalid:test_setinvalid_invalidtable:0: Passed
+main.c:587:P:setinvalid:test_setinvalid_invalidkey:0: Passed
+main.c:597:P:setinvalid:test_setinvalid_invalidconn:0: Passed
+main.c:607:P:setinvalid:test_setinvalid_badtable:0: Passed
+main.c:617:P:setinvalid:test_setinvalid_badkey:0: Passed
+main.c:627:P:setinvalid:test_setinvalid_nocol:0: Passed
+main.c:637:P:setinvalid:test_setinvalid_wrongcol:0: Passed
+main.c:647:P:setinvalid:test_setinvalid_badintval:0: Passed
+main.c:657:P:setinvalid:test_setinvalid_badintval2:0: Passed
+main.c:667:P:setinvalid:test_setinvalid_badstrval:0: Passed
+main.c:677:P:setinvalid:test_setinvalid_longstrval:0: Passed
+main.c:706:P:setinvalidcomplex:test_setinvalidcomplex_missingcolumn:0: Passed
+main.c:716:P:setinvalidcomplex:test_setinvalidcomplex_wrongorder:0: Passed
+main.c:726:P:setinvalidcomplex:test_setinvalidcomplex_nocommas:0: Passed
+main.c:736:P:setinvalidcomplex:test_setinvalidcomplex_badseparators:0: Passed
+main.c:687:P:setmissing:test_setmissing_missingtable:0: Passed
+main.c:696:P:setmissing:test_setmissing_deletemissingkey:0: Passed
+main.c:762:P:setget:test_setget_posint:0: Passed
+main.c:782:P:setget:test_setget_negint:0: Passed
+main.c:802:P:setget:test_setget_zeroint:0: Passed
+main.c:823:P:setget:test_setget_str:0: Passed
+main.c:844:P:setget:test_setget_strwithspc:0: Passed
+main.c:1014:P:setgetcomplex:test_setgetcomplex_threecols:0: Passed
+main.c:1043:P:setgetcomplex:test_setgetcomplex_fourcols:0: Passed
+main.c:1077:P:setgetcomplex:test_setgetcomplex_sixcols:0: Passed
+main.c:861:P:query:test_query_int0:0: Passed
+main.c:872:P:query:test_query_int0b:0: Passed
+main.c:888:P:query:test_query_int1:0: Passed
+main.c:904:P:query:test_query_int1b:0: Passed
+main.c:921:P:query:test_query_int2:0: Passed
+main.c:938:P:query:test_query_int2b:0: Passed
+main.c:949:P:query:test_query_str0:0: Passed
+main.c:965:P:query:test_query_str1:0: Passed
+main.c:981:P:query:test_query_str1b:0: Passed
+main.c:1094:P:querycomplex:test_querycomplex_threecols0a:0: Passed
+main.c:1105:P:querycomplex:test_querycomplex_threecols0b:0: Passed
+main.c:1116:P:querycomplex:test_querycomplex_threecols0c:0: Passed
+main.c:1127:P:querycomplex:test_querycomplex_threecols0d:0: Passed
+main.c:1138:P:querycomplex:test_querycomplex_threecols0e:0: Passed
+main.c:1149:P:querycomplex:test_querycomplex_threecols0f:0: Passed
+main.c:1165:P:querycomplex:test_querycomplex_fourcols1a:0: Passed
+main.c:1181:P:querycomplex:test_querycomplex_fourcols1b:0: Passed
+main.c:1197:P:querycomplex:test_querycomplex_fourcols1c:0: Passed
+main.c:1213:P:querycomplex:test_querycomplex_fourcols1d:0: Passed
+main.c:1230:P:querycomplex:test_querycomplex_sixcols2a:0: Passed
+main.c:1247:P:querycomplex:test_querycomplex_sixcols2b:0: Passed
+main.c:1264:P:querycomplex:test_querycomplex_sixcols2c:0: Passed
+main.c:1281:P:querycomplex:test_querycomplex_sixcols2d:0: Passed
+main.c:1298:P:querycomplex:test_querycomplex_sixcols2e:0: Passed
+main.c:1315:P:querycomplex:test_querycomplex_sixcols2f:0: Passed
+main.c:1337:P:set:test_set_deleteint:0: Passed
+main.c:1352:P:set:test_set_deletestr:0: Passed
+main.c:1371:P:set:test_set_updateint:0: Passed
+main.c:1391:P:set:test_set_updatestr:0: Passed
+main.c:1413:P:setcomplex:test_setcomplex_deletethreecols:0: Passed
+main.c:1428:P:setcomplex:test_setcomplex_deletefourcols:0: Passed
+main.c:1443:P:setcomplex:test_setcomplex_deletesixcols:0: Passed
+main.c:1468:P:setcomplex:test_setcomplex_updatethreecols:0: Passed
+main.c:1497:P:setcomplex:test_setcomplex_updatefourcols:0: Passed
+main.c:1531:P:setcomplex:test_setcomplex_updatesixcols:0: Passed
+main.c:141:F:restartserver_bonus:test_restartserver_threecols_bonus:0: Server didn't run properly.
+main.c:141:F:restartserver_bonus:test_restartserver_fourcols_bonus:0: Server didn't run properly.
+main.c:141:F:restartserver_bonus:test_restartserver_sixcols_bonus:0: Server didn't run properly.
+./procresults

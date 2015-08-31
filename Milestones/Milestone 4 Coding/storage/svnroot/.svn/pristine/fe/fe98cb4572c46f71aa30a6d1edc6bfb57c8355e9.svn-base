@@ -1,0 +1,7 @@
+Running suite a3-partial
+test_query.c:265:E:query_max_keys:test_query_max_keys1:0: (after this point) Received signal 4 (Illegal instruction)
+test_query.c:277:P:query_max_keys:test_query_max_keys2:0: Passed
+test_query.c:285:F:query_max_keys:test_query_max_keys3:0: Query didn't check for max_keys being 0 and test keys being NULL
+test_query.c:295:P:query_predicates:test_query_predicates1:0: Passed
+test_query.c:303:P:query_predicates:test_query_predicates2:0: Passed
+test_query.c:311:P:query_predicates:test_query_predicates3:0: Passed

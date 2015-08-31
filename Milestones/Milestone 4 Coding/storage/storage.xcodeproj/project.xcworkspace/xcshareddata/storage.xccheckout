@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>BA5DEA34-9451-4531-A8BC-2B8D04B3DDBC</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>402a3bd6-9042-4848-bb61-6a1e6f0ce9ce</key>
+		<string>svn+ssh://ug132.eecg.utoronto.ca/groups/ECE297S/cd-037/svnroot</string>
+	</dict>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>402a3bd6-9042-4848-bb61-6a1e6f0ce9ce</key>
+		<string>svnroot/</string>
+	</dict>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>402a3bd6-9042-4848-bb61-6a1e6f0ce9ce</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.subversion</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>402a3bd6-9042-4848-bb61-6a1e6f0ce9ce</string>
+			<key>IDESourceControlWCCName</key>
+			<string>svnroot</string>
+		</dict>
+	</array>
+</dict>
+</plist>

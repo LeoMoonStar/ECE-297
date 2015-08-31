@@ -1,0 +1,522 @@
+/**
+ * @file
+ * @brief This file contains the implementation of the storage server
+ * interface as specified in storage.h.
+ */
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include "storage.h"
+#include "utils.h"
+
+/**
+ * @brief Client File pointer defined in client.c
+ */
+FILE *client_log = NULL;
+
+
+/**
+ * @brief String to pass to the logger function.
+ */
+char log_buffer[BUFFER_SIZE] = {0};
+
+
+/**
+ * @brief Boolean variable to check if the user has been authenticated.
+ */
+bool authenticated = false;
+
+
+/**
+ * @brief Boolean variable to check if a connection is established with a server.
+ */
+bool connected = false;
+
+
+/**
+ * @brief This is just a minimal stub implementation.  You should modify it
+ * according to your design.
+ */
+void* storage_connect(const char *hostname, const int port)
+{
+    char check[MAX_CONFIG_LINE_LEN], trash[MAX_CONFIG_LINE_LEN];
+    
+    char client_file[MAX_LOG_NAME] = "Client";
+    switch (LOGGING)
+    {
+        case 0:
+            client_log = NULL;
+            break;
+            
+        case 1:
+            client_log = stdout;
+            break;
+            
+        case 2:
+            client_log = fopen(generate_logfile(client_file), "w");
+            break;
+    }
+    
+    
+    if(hostname == NULL || sscanf(hostname, "%s %s", check, trash) != 1)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_connect: Incorrect hostname entered: %s\n", hostname);
+        logger(client_log, log_buffer);
+        return NULL;
+    }
+    
+    else if(port == 0 || port < 1024 || port > 65535)
+    {
+        errno = ERR_INVALID_PARAM;
+        // Log failed port number.
+        sprintf(log_buffer, "storage_connect: Incorrect port number entered: %d\n", port);
+        logger(client_log, log_buffer);
+        return NULL;
+    }
+    
+    
+    // Create a socket.
+    int sock = socket(PF_INET, SOCK_STREAM, 0);
+    if (sock < 0)
+    {
+        errno = ERR_CONNECTION_FAIL; // Error occured when not able to connect to server
+        return NULL;
+    }
+    
+    // Get info about the server.
+    struct addrinfo serveraddr, *res;
+    memset(&serveraddr, 0, sizeof serveraddr);
+    serveraddr.ai_family = AF_UNSPEC;
+    serveraddr.ai_socktype = SOCK_STREAM;
+    char portstr[MAX_PORT_LEN] = {0};
+    snprintf(portstr, sizeof portstr, "%d", port);
+    int status = getaddrinfo(hostname, portstr, &serveraddr, &res);
+    if (status != 0)
+    {
+        errno = ERR_CONNECTION_FAIL; // Error occured when not able to connect to server
+        // Log failed address info retrieval from server.
+        sprintf(log_buffer, "storage_connect: Unable to retrieve address info with hostname %s and port %s\n", hostname, portstr);
+        logger(client_log, log_buffer);
+        return NULL;
+    }
+    
+    // Log successful address info retrieval from server.
+    sprintf(log_buffer, "storage_connect: Address info retrieved with hostname %s and port %s\n", hostname, portstr);
+    logger(client_log, log_buffer);
+    
+    // Connect to the server.
+    status = connect(sock, res->ai_addr, res->ai_addrlen);
+    if (status != 0)
+    {
+        errno = ERR_CONNECTION_FAIL; // Error occured when not able to connect to server
+        // Log failed connection between client and the server.
+        sprintf(log_buffer, "storage_connect: Unable to connect to server through socket %d\n", sock);
+        logger(client_log, log_buffer);
+        return NULL;
+    }
+    
+    connected = true;
+    
+    // Log successful connection between client and the server.
+    sprintf(log_buffer, "storage_connect: Connected to server through socket %d\n", sock);
+    logger(client_log, log_buffer);
+    
+    return (void*) sock;
+}
+
+
+/**
+ * @brief This is just a minimal stub implementation.  You should modify it
+ * according to your design.
+ */
+int storage_auth(const char *username, const char *passwd, void *conn)
+{
+    char check[MAX_CONFIG_LINE_LEN], trash[MAX_CONFIG_LINE_LEN];
+    
+    if(conn == NULL)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_auth: Invalid connection");
+        logger(client_log, log_buffer);
+        return -1;
+    }
+    else if(username == NULL || sscanf(username, "%s %s", check, trash) != 1)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_auth: Incorrect username entered: %s\n", username);
+        logger(client_log, log_buffer);
+        return NULL;
+    }
+    else if(passwd == NULL || sscanf(passwd, "%s %s", check, trash) != 1)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_auth: Incorrect password entered: %s\n", passwd);
+        logger(client_log, log_buffer);
+        return NULL;
+    }
+    else if(connected == false)
+    {
+        errno = ERR_CONNECTION_FAIL;
+        sprintf(log_buffer, "storage_auth: Not connected to a server\n");
+        logger(client_log, log_buffer);
+        return -1;
+    }
+    
+    // Connection is really just a socket file descriptor.
+    int sock = (int)conn;
+    
+    int i;
+    char pass_asterik[strlen(passwd) + 1];
+    for(i = 0; i < strlen(passwd); i++)
+        pass_asterik[i] = '*';
+    pass_asterik[i] = 0;
+    
+    
+    // Send some data.
+    char buf[MAX_CMD_LEN];
+    memset(buf, 0, sizeof buf);
+    char *encrypted_passwd = generate_encrypted_password(passwd, NULL);
+    sprintf(buf, "AUTH #%.63s #%.63s\n", username, encrypted_passwd);
+    if (sendall(sock, buf, strlen(buf)) == 0 && recvline(sock, buf, sizeof buf) == 0)
+    {
+        if(strcmp(buf, "AUTH #pass") == 0)
+        {
+            authenticated = true;
+            // Log successful client authorization.
+            sprintf(log_buffer, "storage_auth: Client authorization successful. Username: %s and Password: %s\n", username, pass_asterik);
+            logger(client_log, log_buffer);
+            return 0;
+        }
+        else
+            errno = ERR_AUTHENTICATION_FAILED;
+    }
+    else
+        errno = ERR_UNKNOWN;
+    
+    // Log failed client authorization.
+    sprintf(log_buffer, "storage_auth: Client authorization failure. Username: %s and Password: %s\n", username, pass_asterik);
+    logger(client_log, log_buffer);
+    
+    return -1;
+}
+
+
+/**
+ * @brief This is just a minimal stub implementation.  You should modify it
+ * according to your design.
+ */
+int storage_get(const char *table, const char *key, struct storage_record *record, void *conn)
+{
+    char check[MAX_CONFIG_LINE_LEN], trash[MAX_CONFIG_LINE_LEN];
+    
+    // Connection is really just a socket file descriptor.
+    int sock = (int)conn;
+    char temp_table[MAX_TABLE_LEN] = {0}, temp_key[MAX_KEY_LEN] = {0}, temp_value[MAX_VALUE_LEN] = {0};
+    uintptr_t temp_metadata[MAX_METADATA_LEN];
+    
+    // Send some data.
+    char buf[MAX_CMD_LEN] = {0};
+    memset(buf, 0, sizeof buf);
+    sprintf(buf, "GET #%.19s #%.19s\n", table, key);
+    
+    if(conn == NULL || record == NULL)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_get: Invalid connection");
+        logger(client_log, log_buffer);
+        return -1;
+    }
+    else if(table == NULL || sscanf(table, "%[a-zA-Z0-9] %s", check, trash) != 1)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_get: Incorrect table entered: %s\n", table);
+        logger(client_log, log_buffer);
+    }
+    else if(key == NULL || sscanf(key, "%[a-zA-Z0-9] %s", check, trash) != 1)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_get: Incorrect key entered: %s\n", key);
+        logger(client_log, log_buffer);
+    }
+    else if(connected == false)
+    {
+        errno = ERR_CONNECTION_FAIL;
+        sprintf(log_buffer, "storage_get: Not connected to a server\n");
+        logger(client_log, log_buffer);
+    }
+    else if(authenticated == false)
+    {
+        errno = ERR_NOT_AUTHENTICATED; //Error to check if the user is authenticated
+        sprintf(log_buffer, "storage_get: Connected to a server, but not yet authenticated\n");
+        logger(client_log, log_buffer);
+    }
+    else if (sendall(sock, buf, strlen(buf)) == 0 && recvline(sock, buf, sizeof buf) == 0)
+    {
+        if(sscanf(buf, "GET #%s #%s #%ld #%[^\n]", temp_table, temp_key, temp_metadata, temp_value) == 4)
+        {
+            strcpy(record->value, temp_value);
+            *(record->metadata) = *temp_metadata; 
+            return 0;
+        }
+        else if(strcmp(temp_table, table) != 0)
+        {
+            errno = ERR_TABLE_NOT_FOUND;
+            sprintf(log_buffer, "storage_set: Table not found: %s\n", table);
+            logger(client_log, log_buffer);
+        }
+        else
+        {
+            errno = ERR_KEY_NOT_FOUND;
+            sprintf(log_buffer, "storage_set: Key not found: %s\n", key);
+            logger(client_log, log_buffer);
+        }
+    }
+    else
+    {
+        errno = ERR_UNKNOWN;
+        sprintf(log_buffer, "storage_set: Something really f****d up.\n");
+        logger(client_log, log_buffer);
+    }
+    
+    return -1;
+}
+
+
+/**
+ * @brief This is just a minimal stub implementation.  You should modify it
+ * according to your design.
+ */
+int storage_set(const char *table, const char *key, struct storage_record *record, void *conn)
+{
+    char check[MAX_CONFIG_LINE_LEN], trash[MAX_CONFIG_LINE_LEN];
+    
+    // Connection is really just a socket file descriptor.
+    int sock = (int)conn;
+    char temp_table[MAX_TABLE_LEN] = {0}, temp_key[MAX_KEY_LEN] = {0}, temp_value[MAX_VALUE_LEN] = {0};
+    uintptr_t temp_metadata[MAX_METADATA_LEN];
+
+    if(conn == NULL)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_set: Invalid connection");
+        logger(client_log, log_buffer);
+        return -1;
+    }
+    
+    // Send some data.
+    char buf[MAX_CMD_LEN] = {0};
+    memset(buf, 0, sizeof buf);
+    
+    if(record == NULL) // Trying to delete a record
+        sprintf(buf, "SET #%.19s #%.19s #0 #NULL\n", table, key);
+    else if(record->metadata == NULL)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_set: Invalid metadata");
+        logger(client_log, log_buffer);
+        return -1;
+    }
+    else // Trying to modify a record
+        sprintf(buf, "SET #%.19s #%.19s #%ld #%.799s\n", table, key, *(record->metadata), record->value);
+    
+    if(table == NULL || sscanf(table, "%[a-zA-Z0-9] %s", check, trash) != 1)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_set: Incorrect table entered: %s\n", table);
+        logger(client_log, log_buffer);
+    }
+    else if(key == NULL || sscanf(key, "%[a-zA-Z0-9] %s", check, trash) != 1)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_set: Incorrect key entered: %s\n", key);
+        logger(client_log, log_buffer);
+    }
+    else if(record != NULL && check_value(record->value) == false)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_set: Incorrect value entered: %s\n", record->value);
+        logger(client_log, log_buffer);
+    }
+    else if(connected == false)
+    {
+        errno = ERR_CONNECTION_FAIL;
+        sprintf(log_buffer, "storage_set: Not connected to a server\n");
+        logger(client_log, log_buffer);
+    }
+    else if(authenticated == false)
+    {
+        errno = ERR_NOT_AUTHENTICATED; //Error to check if the user is authenticated
+        sprintf(log_buffer, "storage_set: Connected to a server, but not yet authenticated\n");
+        logger(client_log, log_buffer);
+    }
+    else if (sendall(sock, buf, strlen(buf)) == 0 && recvline(sock, buf, sizeof buf) == 0)
+    {
+        if(sscanf(buf, "SET #%s #%s #%ld #%[^\n]", temp_table, temp_key, temp_metadata, temp_value) == 4)
+        {
+            if(strcmp(temp_value, "invalid") == 0)
+            {
+                errno = ERR_INVALID_PARAM;
+                sprintf(log_buffer, "storage_set: Invalid value: %s\n", record->value);
+                logger(client_log, log_buffer);
+            }
+            else if(strcmp(temp_value, "abort") == 0)
+            {
+                errno = ERR_TRANSACTION_ABORT;
+                sprintf(log_buffer, "storage_set: Transaction abort\n");
+                logger(client_log, log_buffer);
+            } 
+            else
+            {
+                *(record->metadata) = 0;
+                return 0;
+            }
+        }
+        else if(strcmp(temp_table, table) != 0)
+        {
+            errno = ERR_TABLE_NOT_FOUND;
+            sprintf(log_buffer, "storage_set: Table not found: %s\n", table);
+            logger(client_log, log_buffer);
+        }
+        else
+        {
+            errno = ERR_KEY_NOT_FOUND;
+            sprintf(log_buffer, "storage_set: Key not found: %s\n", key);
+            logger(client_log, log_buffer);
+        }
+    }
+    else
+    {
+        errno = ERR_UNKNOWN;
+        sprintf(log_buffer, "storage_set: Something really f****d up.\n");
+        logger(client_log, log_buffer);
+    }
+
+    *(record->metadata) = 0;
+    return -1;
+}
+
+
+int storage_query(const char *table, const char *predicates, char **keys, const int max_keys, void *conn)
+{
+    char check[MAX_CONFIG_LINE_LEN], trash[MAX_CONFIG_LINE_LEN];
+    int matched_keys, total_keys = 1;
+    
+    // Connection is really just a socket file descriptor.
+    int sock = (int)conn;
+    char temp_table[MAX_TABLE_LEN] = {0};
+    
+    if(max_keys > 0) // To avoid declaring temp_keys with non-positive integer size
+        total_keys = max_keys;
+    
+    char temp_keys[total_keys * MAX_KEY_LEN];
+    memset(temp_keys, 0, sizeof temp_keys);
+    
+    if(conn == NULL)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_query: Invalid connection");
+        logger(client_log, log_buffer);
+        return -1;
+    }
+    
+    // Send some data.
+    char buf[MAX_CMD_LEN] = {0};
+    memset(buf, 0, sizeof buf);
+    //make_predicates(predicates);
+    sprintf(buf, "QUERY #%.19s #%d #%s\n", table, max_keys, predicates);
+    
+    
+    if(max_keys < 0 || (max_keys > 0 && keys == NULL))
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_query: Invalid max keys/keys array combination\n");
+        logger(client_log, log_buffer);
+    }
+    
+    else if(table == NULL || sscanf(table, "%[a-zA-Z0-9] %s", check, trash) != 1)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_query: Incorrect table entered: %s\n", table);
+        logger(client_log, log_buffer);
+    }
+    
+    else if(predicates == NULL || check_predicates(predicates) == false)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_query: Incorrect predicates entered: %s\n", predicates);
+        logger(client_log, log_buffer);
+    }
+    else if(connected == false)
+    {
+        errno = ERR_CONNECTION_FAIL;
+        sprintf(log_buffer, "storage_query: Not connected to a server\n");
+        logger(client_log, log_buffer);
+    }
+    else if(authenticated == false)
+    {
+        errno = ERR_NOT_AUTHENTICATED; //Error to check if the user is authenticated
+        sprintf(log_buffer, "storage_query: Connected to a server, but not yet authenticated\n");
+        logger(client_log, log_buffer);
+    }
+    else if (sendall(sock, buf, strlen(buf)) == 0 && recvline(sock, buf, sizeof buf) == 0)
+    {
+        if(sscanf(buf, "QUERY #%s #%d #%[^\n]", temp_table, &matched_keys, temp_keys) == 3)
+        {
+            //Successfully got a list of keys that match the predicate, so put into given array
+            populate_keys(keys, max_keys, temp_keys);
+            return matched_keys;
+        }
+        else if(strcmp(temp_table, table) != 0)
+        {
+            errno = ERR_TABLE_NOT_FOUND;
+            sprintf(log_buffer, "storage_set: Table not found: %s\n", table);
+            logger(client_log, log_buffer);
+        }
+        else //Either no keys matched or invalid predicate entered, just return 0 or -1 respectively
+            return matched_keys;
+    }
+    else
+    {
+        errno = ERR_UNKNOWN;
+        sprintf(log_buffer, "storage_set: Something really f****d up.\n");
+        logger(client_log, log_buffer);
+    }
+    
+    return -1;
+}
+
+
+/**
+ * @brief This is just a minimal stub implementation.  You should modify it
+ * according to your design.
+ */
+int storage_disconnect(void *conn)
+{
+    if(conn == NULL)
+    {
+        errno = ERR_INVALID_PARAM;
+        sprintf(log_buffer, "storage_disconnect: Invalid connection");
+        logger(client_log, log_buffer);
+        return -1;
+    }
+    
+    // Cleanup
+    int sock = (int)conn;
+    close(sock);
+    
+    // Log successful add`ess info retrieval from server.
+    sprintf(log_buffer, "storage_disconnect: Server connection closed\n");
+    logger(client_log, log_buffer);
+    
+    connected = false;
+    authenticated = false;
+    
+    return 0;
+}

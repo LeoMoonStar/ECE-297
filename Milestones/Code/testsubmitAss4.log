@@ -1,0 +1,38 @@
+performance-asst4.pdf does not exit.
+Please make sure that you include this file in your submission and that the file name is not misspelled.
+Copying files to test directory
+
+Untarring the files
+
+Checking for all necessary files and directories
+
+Retrieving the test cases, this may take some time.
+___________________________________________________
+Running suite a4-test
+main.c:342:P:sanity:test_sanity_filemod:0: Passed
+main.c:357:P:configerror:test_configerror_nocomma:0: Passed
+main.c:364:P:configerror:test_configerror_negsize:0: Passed
+main.c:382:P:config:test_config_onetable:0: Passed
+main.c:404:P:conn:test_conn_basic:0: Passed
+main.c:413:P:conninvalid:test_conninvalid_connectinvalidparam:0: Passed
+main.c:434:P:getinvalid:test_getinvalid_badtable:0: Passed
+main.c:445:P:getmissing:test_getmissing_missingtable:0: Passed
+main.c:464:P:setinvalid:test_setinvalid_invalidtable:0: Passed
+main.c:479:P:setinvalid:test_setinvalid_badkey:0: Passed
+main.c:502:P:setinvalidcomplex:test_setinvalidcomplex_missingcolumn:0: Passed
+main.c:491:P:setmissing:test_setmissing_missingtable:0: Passed
+main.c:531:P:setget:test_setget_posint:0: Passed
+main.c:549:P:query:test_query_int0:0: Passed
+main.c:566:P:query:test_query_int1:0: Passed
+main.c:622:P:set:test_set_deleteint:0: Passed
+main.c:638:P:set:test_set_deletestr:0: Passed
+main.c:683:P:setcomplex:test_setcomplex_deletethreecols:0: Passed
+main.c:710:P:setcomplex:test_setcomplex_updatethreecols:0: Passed
+main.c:747:P:transaction:test_transaction_pass1:0: Passed
+main.c:786:P:transaction:test_transaction_fail1:0: Passed
+main.c:841:P:concurrency:test_concurrency_get:0: Passed
+main.c:895:P:concurrency:test_concurrency_setget:0: Passed
+main.c:940:P:concurrency:test_concurrency_txpass:0: Passed
+Results for all suites run:
+100%: Checks: 24, Failures: 0, Errors: 0
+Your code is ready for Submission

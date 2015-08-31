@@ -1,0 +1,11 @@
+main.c:510:E:conninvalid:test_conninvalid_connectinvalidparam:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:351:E:auth:test_auth_with_null_params:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:439:F:auth:test_client1_auths_disconnects_client2_calls_storage_get_without_authentication:0: Unauthenticated storage_get() not setting errno to ERR_NOT_AUTHENTICATED
+main.c:473:F:auth:test_client1_auths_disconnects_client2_calls_storage_set_without_authentication:0: storage_set without successful authentication must fail.
+main.c:535:E:getinvalid:test_getinvalid_invalidtable:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:545:E:getinvalid:test_getinvalid_invalidkey:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:558:F:getinvalid:test_getinvalid_invalidrecord:0: storage_get with invalid param not setting errno properly.
+main.c:614:E:setinvalid:test_setinvalid_invalidtable:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:625:E:setinvalid:test_setinvalid_invalidkey:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:675:E:setmissing:test_setmissing_deletemissingkey:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:1180:E:set:test_set_delete:0: (after this point) Received signal 11 (Segmentation fault)

@@ -1,0 +1,3 @@
+main.c:141:F:restartserver_bonus:test_restartserver_threecols_bonus:0: Server didn't run properly.
+main.c:141:F:restartserver_bonus:test_restartserver_fourcols_bonus:0: Server didn't run properly.
+main.c:141:F:restartserver_bonus:test_restartserver_sixcols_bonus:0: Server didn't run properly.

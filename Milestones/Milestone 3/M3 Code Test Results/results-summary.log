@@ -1,0 +1,20 @@
+Total: 85 tests pass
+1 tests pass in sanity
+9 tests pass in configerror
+3 tests pass in config
+2 tests pass in conn
+2 tests pass in conninvalid
+6 tests pass in getinvalid
+2 tests pass in getmissing
+11 tests pass in setinvalid
+4 tests pass in setinvalidcomplex
+2 tests pass in setmissing
+5 tests pass in setget
+3 tests pass in setgetcomplex
+9 tests pass in query
+16 tests pass in querycomplex
+4 tests pass in set
+6 tests pass in setcomplex
+0 tests pass in restartserver_bonus
+Summary (comma separated): 1,9,3,2,2,6,2,11,4,2,5,3,9,16,4,6,0,
+Summary (tab separated): 1	9	3	2	2	6	2	11	4	2	5	3	9	16	4	6	0

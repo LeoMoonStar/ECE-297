@@ -1,0 +1,380 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		0D0B94A718B18F9A0066A422 /* census */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = census; sourceTree = "<group>"; };
+		0D0B94A818B18F9A0066A422 /* census.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = census.conf; sourceTree = "<group>"; };
+		0DD9727A18D5635100438D0D /* conf-duplicateport.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-duplicateport.conf"; sourceTree = "<group>"; };
+		0DD9727B18D5635100438D0D /* conf-onetable.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-onetable.conf"; sourceTree = "<group>"; };
+		0DD9727C18D5635100438D0D /* conf-threetables.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-threetables.conf"; sourceTree = "<group>"; };
+		0DD9727D18D5635100438D0D /* conf-twotables.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-twotables.conf"; sourceTree = "<group>"; };
+		0DD9727E18D5635100438D0D /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		0DD9727F18D5635100438D0D /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		0DD9728018D5635100438D0D /* md5sum.check */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = md5sum.check; sourceTree = "<group>"; };
+		0DD9728218D5635100438D0D /* conf-duplicateport.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-duplicateport.conf"; sourceTree = "<group>"; };
+		0DD9728318D5635100438D0D /* conf-onetable.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-onetable.conf"; sourceTree = "<group>"; };
+		0DD9728418D5635100438D0D /* conf-threetables.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-threetables.conf"; sourceTree = "<group>"; };
+		0DD9728518D5635100438D0D /* conf-twotables.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-twotables.conf"; sourceTree = "<group>"; };
+		0DD9728618D5635100438D0D /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		0DD9728718D5635100438D0D /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		0DD9728818D5635100438D0D /* md5sum.check */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = md5sum.check; sourceTree = "<group>"; };
+		0DD9728A18D5635100438D0D /* conf-badtype.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-badtype.conf"; sourceTree = "<group>"; };
+		0DD9728B18D5635100438D0D /* conf-complextables.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-complextables.conf"; sourceTree = "<group>"; };
+		0DD9728C18D5635100438D0D /* conf-duplicatetablecoltype.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-duplicatetablecoltype.conf"; sourceTree = "<group>"; };
+		0DD9728D18D5635100438D0D /* conf-negsize.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-negsize.conf"; sourceTree = "<group>"; };
+		0DD9728E18D5635100438D0D /* conf-nocomma.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-nocomma.conf"; sourceTree = "<group>"; };
+		0DD9728F18D5635100438D0D /* conf-onetable.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-onetable.conf"; sourceTree = "<group>"; };
+		0DD9729018D5635100438D0D /* conf-simpletables.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-simpletables.conf"; sourceTree = "<group>"; };
+		0DD9729118D5635100438D0D /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		0DD9729218D5635100438D0D /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		0DD9729318D5635100438D0D /* md5sum.check */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = md5sum.check; sourceTree = "<group>"; };
+		0DD9729518D5635100438D0D /* conf-simpletables.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-simpletables.conf"; sourceTree = "<group>"; };
+		0DD9729618D5635100438D0D /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		0DD9729718D5635100438D0D /* test_get.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = test_get.c; sourceTree = "<group>"; };
+		0DD9729818D5635100438D0D /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		0DD9729918D5635100438D0D /* Makefile.common */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makefile.common; sourceTree = "<group>"; };
+		0DD9729B18D5635100438D0D /* conf-complextables.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-complextables.conf"; sourceTree = "<group>"; };
+		0DD9729C18D5635100438D0D /* conf-simpletables.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-simpletables.conf"; sourceTree = "<group>"; };
+		0DD9729D18D5635100438D0D /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		0DD9729E18D5635100438D0D /* test_query.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = test_query.c; sourceTree = "<group>"; };
+		0DD972A018D5635100438D0D /* conf-complextables.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-complextables.conf"; sourceTree = "<group>"; };
+		0DD972A118D5635100438D0D /* conf-simpletables.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "conf-simpletables.conf"; sourceTree = "<group>"; };
+		0DD972A218D5635100438D0D /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		0DD972A318D5635100438D0D /* test_set.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = test_set.c; sourceTree = "<group>"; };
+		0DDFA7F518B08AF6005D94D0 /* doxygen.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = doxygen.conf; sourceTree = "<group>"; };
+		0DDFA7F618B08AF6005D94D0 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		0DDFA7F718B08AF6005D94D0 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		0DDFA7F918B08AF6005D94D0 /* client.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = client.c; sourceTree = "<group>"; };
+		0DDFA7FA18B08AF6005D94D0 /* default.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = default.conf; sourceTree = "<group>"; };
+		0DDFA7FB18B08AF6005D94D0 /* encrypt_passwd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = encrypt_passwd.c; sourceTree = "<group>"; };
+		0DDFA7FC18B08AF6005D94D0 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		0DDFA7FD18B08AF6005D94D0 /* server.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = server.c; sourceTree = "<group>"; };
+		0DDFA7FE18B08AF6005D94D0 /* storage.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = storage.c; sourceTree = "<group>"; };
+		0DDFA7FF18B08AF6005D94D0 /* storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = storage.h; sourceTree = "<group>"; };
+		0DDFA80018B08AF6005D94D0 /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
+		0DDFA80118B08AF6005D94D0 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0D0B94A618B18F3A0066A422 /* data */ = {
+			isa = PBXGroup;
+			children = (
+				0D0B94A718B18F9A0066A422 /* census */,
+				0D0B94A818B18F9A0066A422 /* census.conf */,
+			);
+			path = data;
+			sourceTree = "<group>";
+		};
+		0DD9727918D5635100438D0D /* a1-partial */ = {
+			isa = PBXGroup;
+			children = (
+				0DD9727A18D5635100438D0D /* conf-duplicateport.conf */,
+				0DD9727B18D5635100438D0D /* conf-onetable.conf */,
+				0DD9727C18D5635100438D0D /* conf-threetables.conf */,
+				0DD9727D18D5635100438D0D /* conf-twotables.conf */,
+				0DD9727E18D5635100438D0D /* main.c */,
+				0DD9727F18D5635100438D0D /* Makefile */,
+				0DD9728018D5635100438D0D /* md5sum.check */,
+			);
+			path = "a1-partial";
+			sourceTree = "<group>";
+		};
+		0DD9728118D5635100438D0D /* a2-partial */ = {
+			isa = PBXGroup;
+			children = (
+				0DD9728218D5635100438D0D /* conf-duplicateport.conf */,
+				0DD9728318D5635100438D0D /* conf-onetable.conf */,
+				0DD9728418D5635100438D0D /* conf-threetables.conf */,
+				0DD9728518D5635100438D0D /* conf-twotables.conf */,
+				0DD9728618D5635100438D0D /* main.c */,
+				0DD9728718D5635100438D0D /* Makefile */,
+				0DD9728818D5635100438D0D /* md5sum.check */,
+			);
+			path = "a2-partial";
+			sourceTree = "<group>";
+		};
+		0DD9728918D5635100438D0D /* a3-partial */ = {
+			isa = PBXGroup;
+			children = (
+				0DD9728A18D5635100438D0D /* conf-badtype.conf */,
+				0DD9728B18D5635100438D0D /* conf-complextables.conf */,
+				0DD9728C18D5635100438D0D /* conf-duplicatetablecoltype.conf */,
+				0DD9728D18D5635100438D0D /* conf-negsize.conf */,
+				0DD9728E18D5635100438D0D /* conf-nocomma.conf */,
+				0DD9728F18D5635100438D0D /* conf-onetable.conf */,
+				0DD9729018D5635100438D0D /* conf-simpletables.conf */,
+				0DD9729118D5635100438D0D /* main.c */,
+				0DD9729218D5635100438D0D /* Makefile */,
+				0DD9729318D5635100438D0D /* md5sum.check */,
+			);
+			path = "a3-partial";
+			sourceTree = "<group>";
+		};
+		0DD9729418D5635100438D0D /* get */ = {
+			isa = PBXGroup;
+			children = (
+				0DD9729518D5635100438D0D /* conf-simpletables.conf */,
+				0DD9729618D5635100438D0D /* Makefile */,
+				0DD9729718D5635100438D0D /* test_get.c */,
+			);
+			path = get;
+			sourceTree = "<group>";
+		};
+		0DD9729A18D5635100438D0D /* query */ = {
+			isa = PBXGroup;
+			children = (
+				0DD9729B18D5635100438D0D /* conf-complextables.conf */,
+				0DD9729C18D5635100438D0D /* conf-simpletables.conf */,
+				0DD9729D18D5635100438D0D /* Makefile */,
+				0DD9729E18D5635100438D0D /* test_query.c */,
+			);
+			path = query;
+			sourceTree = "<group>";
+		};
+		0DD9729F18D5635100438D0D /* set */ = {
+			isa = PBXGroup;
+			children = (
+				0DD972A018D5635100438D0D /* conf-complextables.conf */,
+				0DD972A118D5635100438D0D /* conf-simpletables.conf */,
+				0DD972A218D5635100438D0D /* Makefile */,
+				0DD972A318D5635100438D0D /* test_set.c */,
+			);
+			path = set;
+			sourceTree = "<group>";
+		};
+		0DDFA7E618B08AD7005D94D0 = {
+			isa = PBXGroup;
+			children = (
+				0DDFA7F118B08AF6005D94D0 /* svnroot */,
+			);
+			sourceTree = "<group>";
+		};
+		0DDFA7F118B08AF6005D94D0 /* svnroot */ = {
+			isa = PBXGroup;
+			children = (
+				0DDFA7F218B08AF6005D94D0 /* trunk */,
+			);
+			path = svnroot;
+			sourceTree = "<group>";
+		};
+		0DDFA7F218B08AF6005D94D0 /* trunk */ = {
+			isa = PBXGroup;
+			children = (
+				0DDFA7F318B08AF6005D94D0 /* storage */,
+			);
+			path = trunk;
+			sourceTree = "<group>";
+		};
+		0DDFA7F318B08AF6005D94D0 /* storage */ = {
+			isa = PBXGroup;
+			children = (
+				0D0B94A618B18F3A0066A422 /* data */,
+				0DDFA7F418B08AF6005D94D0 /* doc */,
+				0DDFA7F718B08AF6005D94D0 /* Makefile */,
+				0DDFA7F818B08AF6005D94D0 /* src */,
+				0DDFA80218B08AF6005D94D0 /* test */,
+			);
+			path = storage;
+			sourceTree = "<group>";
+		};
+		0DDFA7F418B08AF6005D94D0 /* doc */ = {
+			isa = PBXGroup;
+			children = (
+				0DDFA7F518B08AF6005D94D0 /* doxygen.conf */,
+				0DDFA7F618B08AF6005D94D0 /* Makefile */,
+			);
+			path = doc;
+			sourceTree = "<group>";
+		};
+		0DDFA7F818B08AF6005D94D0 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				0DDFA7F918B08AF6005D94D0 /* client.c */,
+				0DDFA7FA18B08AF6005D94D0 /* default.conf */,
+				0DDFA7FB18B08AF6005D94D0 /* encrypt_passwd.c */,
+				0DDFA7FC18B08AF6005D94D0 /* Makefile */,
+				0DDFA7FD18B08AF6005D94D0 /* server.c */,
+				0DDFA7FE18B08AF6005D94D0 /* storage.c */,
+				0DDFA7FF18B08AF6005D94D0 /* storage.h */,
+				0DDFA80018B08AF6005D94D0 /* utils.c */,
+				0DDFA80118B08AF6005D94D0 /* utils.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		0DDFA80218B08AF6005D94D0 /* test */ = {
+			isa = PBXGroup;
+			children = (
+				0DD9727918D5635100438D0D /* a1-partial */,
+				0DD9728118D5635100438D0D /* a2-partial */,
+				0DD9728918D5635100438D0D /* a3-partial */,
+				0DD9729418D5635100438D0D /* get */,
+				0DD9729818D5635100438D0D /* Makefile */,
+				0DD9729918D5635100438D0D /* Makefile.common */,
+				0DD9729A18D5635100438D0D /* query */,
+				0DD9729F18D5635100438D0D /* set */,
+			);
+			path = test;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		0DDFA7EB18B08AD7005D94D0 /* ghj */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = 0DDFA7EE18B08AD7005D94D0 /* Build configuration list for PBXLegacyTarget "ghj" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			dependencies = (
+			);
+			name = ghj;
+			passBuildSettingsInEnvironment = 1;
+			productName = ghj;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		0DDFA7E718B08AD7005D94D0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0500;
+				ORGANIZATIONNAME = "Vaibhav Vijay";
+			};
+			buildConfigurationList = 0DDFA7EA18B08AD7005D94D0 /* Build configuration list for PBXProject "storage" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 0DDFA7E618B08AD7005D94D0;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0DDFA7EB18B08AD7005D94D0 /* ghj */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		0DDFA7EC18B08AD7005D94D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		0DDFA7ED18B08AD7005D94D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		0DDFA7EF18B08AD7005D94D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUGGING_SYMBOLS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		0DDFA7F018B08AD7005D94D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0DDFA7EA18B08AD7005D94D0 /* Build configuration list for PBXProject "storage" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DDFA7EC18B08AD7005D94D0 /* Debug */,
+				0DDFA7ED18B08AD7005D94D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0DDFA7EE18B08AD7005D94D0 /* Build configuration list for PBXLegacyTarget "ghj" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DDFA7EF18B08AD7005D94D0 /* Debug */,
+				0DDFA7F018B08AD7005D94D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0DDFA7E718B08AD7005D94D0 /* Project object */;
+}

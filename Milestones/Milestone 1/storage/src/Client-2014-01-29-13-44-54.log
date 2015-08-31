@@ -1,0 +1,5 @@
+1111aAUTH asd xxzZZjZESTMfM
+> storage_auth: successful.
+GET f as
+> storage_get: the value returned for key 'as' is 'GET f as'.
+> Disconnecting from localhost:1111 ...

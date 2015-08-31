@@ -1,0 +1,54 @@
+\hypertarget{client_8c}{\section{client.\-c File Reference}
+\label{client_8c}\index{client.\-c@{client.\-c}}
+}
+
+
+This file implements a \char`\"{}very\char`\"{} simple sample client.  
+
+
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}storage.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}utils.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{client_8c_a0ddf1224851353fc92bfbff6f499fa97}{main} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Start a client to interact with the storage server. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{client_8c_a0aa47e573fb0de4783add2c6d61ca18a}{F\-I\-L\-E $\ast$ \hyperlink{client_8c_a0aa47e573fb0de4783add2c6d61ca18a}{Client\-File}}\label{client_8c_a0aa47e573fb0de4783add2c6d61ca18a}
+
+\begin{DoxyCompactList}\small\item\em This is just a minimal stub implementation. You should modify it according to your design. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This file implements a \char`\"{}very\char`\"{} simple sample client. The client connects to the server, running at S\-E\-R\-V\-E\-R\-H\-O\-S\-T\-:S\-E\-R\-V\-E\-R\-P\-O\-R\-T and performs a number of storage\-\_\-$\ast$ operations. If there are errors, the client exists. 
+
+Definition in file \hyperlink{client_8c_source}{client.\-c}.
+
+
+
+\subsection{Function Documentation}
+\hypertarget{client_8c_a0ddf1224851353fc92bfbff6f499fa97}{\index{client.\-c@{client.\-c}!main@{main}}
+\index{main@{main}!client.c@{client.\-c}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]}}
+\end{DoxyParamCaption}
+)}}\label{client_8c_a0ddf1224851353fc92bfbff6f499fa97}
+
+
+Start a client to interact with the storage server. 
+
+If connect is successful, the client performs a storage\-\_\-set/get() on T\-A\-B\-L\-E and K\-E\-Y and outputs the results on stdout. Finally, it exists after disconnecting from the server. 
+
+Definition at line 24 of file client.\-c.
+
+
+
+References Client\-File, logger(), M\-A\-X\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-L\-I\-N\-E\-\_\-\-L\-E\-N, M\-A\-X\-\_\-\-E\-N\-C\-\_\-\-P\-A\-S\-S\-W\-O\-R\-D\-\_\-\-L\-E\-N, M\-A\-X\-\_\-\-H\-O\-S\-T\-\_\-\-L\-E\-N, M\-A\-X\-\_\-\-K\-E\-Y\-\_\-\-L\-E\-N, M\-A\-X\-\_\-\-T\-A\-B\-L\-E\-\_\-\-L\-E\-N, M\-A\-X\-\_\-\-U\-S\-E\-R\-N\-A\-M\-E\-\_\-\-L\-E\-N, storage\-\_\-auth(), storage\-\_\-connect(), storage\-\_\-disconnect(), storage\-\_\-get(), storage\-\_\-set(), and storage\-\_\-record\-::value.
+

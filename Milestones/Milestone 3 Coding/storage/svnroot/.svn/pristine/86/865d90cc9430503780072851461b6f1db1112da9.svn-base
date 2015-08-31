@@ -1,0 +1,11 @@
+server main: Server on localhost:6924
+server main: Got a connection from 127.0.0.1:24503
+handle_command: Processing command 'AUTH #admin #xxxnq.BMCifhU'
+handle_command: Processing command 'SET #inttbl #somekey1 #col -2'
+handle_command: Processing command 'SET #inttbl #somekey2 #col 2'
+handle_command: Processing command 'SET #inttbl #somekey3 #col 4'
+handle_command: Processing command 'SET #strtbl #somekey1 #col abc'
+handle_command: Processing command 'SET #strtbl #somekey2 #col def'
+handle_command: Processing command 'SET #strtbl #somekey3 #col abc def'
+handle_command: Processing command 'QUERY #inttbl #1000 #col > 9'
+server main: Closed connection from 127.0.0.1:24503

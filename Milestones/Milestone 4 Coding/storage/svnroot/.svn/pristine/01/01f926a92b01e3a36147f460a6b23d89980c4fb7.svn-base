@@ -1,0 +1,8 @@
+server_host localhost
+server_port 1111
+username admin
+password xxiz1FI3TBLPs
+table subwayLines name:char[30],stops:int,kilometres:int
+table cities lowTemperature:int,highTemperature:int,province:char[20]
+table cars brand:char[10],price:int
+table students id:int,grade:int

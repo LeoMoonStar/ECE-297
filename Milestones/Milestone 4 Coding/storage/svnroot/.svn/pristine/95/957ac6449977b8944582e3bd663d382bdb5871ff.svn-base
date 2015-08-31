@@ -1,0 +1,5 @@
+server_host localhost
+server_port 1111
+username admin
+password xxiz1FI3TBLPs
+table subwayLines name:char[20], stops:int, kilometres:int

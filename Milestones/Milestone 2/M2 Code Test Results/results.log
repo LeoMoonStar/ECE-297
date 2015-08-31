@@ -1,0 +1,52 @@
+Running suite a2
+main.c:175:P:sanity:test_sanity_filemod:0: Passed
+main.c:206:P:config:test_config_onetable:0: Passed
+main.c:213:P:config:test_config_twotables:0: Passed
+main.c:220:P:config:test_config_threetables:0: Passed
+main.c:231:P:config:test_config_duplicatetable:0: Passed
+main.c:238:P:config:test_config_duplicateport:0: Passed
+main.c:245:P:config:test_config_duplicatehost:0: Passed
+main.c:258:P:config:test_config_nousername:0: Passed
+main.c:265:P:config:test_config_duplicatusername:0: Passed
+main.c:497:P:conn:test_conn_basic:0: Passed
+main.c:506:P:conn:test_conn_connectnoserver:0: Passed
+main.c:510:E:conninvalid:test_conninvalid_connectinvalidparam:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:522:P:conninvalid:test_conninvalid_disconnectinvalidparam:0: Passed
+main.c:293:P:auth:test_auth_validusername_validpassword:0: Passed
+main.c:309:P:auth:test_auth_invalidusername_validpassword:0: Passed
+main.c:325:P:auth:test_auth_validusername_invalidpassword:0: Passed
+main.c:341:P:auth:test_auth_invalidusername_invalidpassword:0: Passed
+main.c:351:E:auth:test_auth_with_null_params:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:386:P:auth:test_storage_get_without_authentication:0: Passed
+main.c:404:P:auth:test_storage_set_without_authentication:0: Passed
+main.c:439:F:auth:test_client1_auths_disconnects_client2_calls_storage_get_without_authentication:0: Unauthenticated storage_get() not setting errno to ERR_NOT_AUTHENTICATED
+main.c:473:F:auth:test_client1_auths_disconnects_client2_calls_storage_set_without_authentication:0: storage_set without successful authentication must fail.
+main.c:535:E:getinvalid:test_getinvalid_invalidtable:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:545:E:getinvalid:test_getinvalid_invalidkey:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:558:F:getinvalid:test_getinvalid_invalidrecord:0: storage_get with invalid param not setting errno properly.
+main.c:567:P:getinvalid:test_getinvalid_invalidconn:0: Passed
+main.c:576:P:getinvalid:test_getinvalid_badtable:0: Passed
+main.c:585:P:getinvalid:test_getinvalid_badkey:0: Passed
+main.c:594:P:getmissing:test_getmissing_missingtable:0: Passed
+main.c:603:P:getmissing:test_getmissing_missingkey:0: Passed
+main.c:614:E:setinvalid:test_setinvalid_invalidtable:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:625:E:setinvalid:test_setinvalid_invalidkey:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:641:P:setinvalid:test_setinvalid_invalidconn:0: Passed
+main.c:651:P:setinvalid:test_setinvalid_badtable:0: Passed
+main.c:661:P:setinvalid:test_setinvalid_badkey:0: Passed
+main.c:671:P:setmissing:test_setmissing_missingtable:0: Passed
+main.c:675:E:setmissing:test_setmissing_deletemissingkey:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:709:P:oneserver:test_oneserver_onetable:0: Passed
+main.c:745:P:oneserver:test_oneserver_twotables:0: Passed
+main.c:792:P:oneserver:test_oneserver_threetables:0: Passed
+main.c:838:P:restartserver:test_restartserver_onetable:0: Passed
+main.c:887:P:restartserver:test_restartserver_twotables:0: Passed
+main.c:943:P:restartserver:test_restartserver_threetables:0: Passed
+main.c:990:P:restartclient:test_restartclient_onetable:0: Passed
+main.c:1040:P:restartclient:test_restartclient_twotables:0: Passed
+main.c:1101:P:restartclient:test_restartclient_threetables:0: Passed
+main.c:1135:P:set:test_set_valwithspc:0: Passed
+main.c:1163:P:set:test_set_update:0: Passed
+main.c:1180:E:set:test_set_delete:0: (after this point) Received signal 11 (Segmentation fault)
+Results for all suites run:
+77%: Checks: 49, Failures: 3, Errors: 8

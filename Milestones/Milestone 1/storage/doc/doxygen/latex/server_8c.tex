@@ -1,0 +1,107 @@
+\hypertarget{server_8c}{\section{server.\-c File Reference}
+\label{server_8c}\index{server.\-c@{server.\-c}}
+}
+
+
+This file implements the storage server.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$sys/socket.\-h$>$}\\*
+{\ttfamily \#include $<$arpa/inet.\-h$>$}\\*
+{\ttfamily \#include $<$netdb.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$signal.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}utils.\-h\char`\"{}}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{server_8c_a36b090ddf192f97d9fecf8ff5a98996e}{\#define \hyperlink{server_8c_a36b090ddf192f97d9fecf8ff5a98996e}{M\-A\-X\-\_\-\-L\-I\-S\-T\-E\-N\-Q\-U\-E\-U\-E\-L\-E\-N}~20}\label{server_8c_a36b090ddf192f97d9fecf8ff5a98996e}
+
+\begin{DoxyCompactList}\small\item\em The maximum number of queued connections. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{server_8c_a94a11842e987c681b4f881460900b7d3}{handle\-\_\-command} (int sock, char $\ast$cmd)
+\begin{DoxyCompactList}\small\item\em Process a command from the client. \end{DoxyCompactList}\item 
+int \hyperlink{server_8c_a0ddf1224851353fc92bfbff6f499fa97}{main} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Start the storage server. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{server_8c_a700865741f3e16d9e1369d43cbcb788b}{F\-I\-L\-E $\ast$ {\bfseries serverlogger}}\label{server_8c_a700865741f3e16d9e1369d43cbcb788b}
+
+\item 
+\hypertarget{server_8c_a5e0344a4a2d31c2476ecd705a7d76d73}{char {\bfseries stringmake} \mbox{[}\hyperlink{utils_8h_a1eb73c104b484cf18752169509cebfe2}{M\-A\-X\-\_\-\-C\-M\-D\-\_\-\-L\-E\-N}\mbox{]}}\label{server_8c_a5e0344a4a2d31c2476ecd705a7d76d73}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This file implements the storage server. The storage server should be named \char`\"{}server\char`\"{} and should take a single command line argument that refers to the configuration file.
+
+The storage server should be able to communicate with the client library functions declared in \hyperlink{storage_8h}{storage.\-h} and implemented in \hyperlink{storage_8c}{storage.\-c}. 
+
+Definition in file \hyperlink{server_8c_source}{server.\-c}.
+
+
+
+\subsection{Function Documentation}
+\hypertarget{server_8c_a94a11842e987c681b4f881460900b7d3}{\index{server.\-c@{server.\-c}!handle\-\_\-command@{handle\-\_\-command}}
+\index{handle\-\_\-command@{handle\-\_\-command}!server.c@{server.\-c}}
+\subsubsection[{handle\-\_\-command}]{\setlength{\rightskip}{0pt plus 5cm}int handle\-\_\-command (
+\begin{DoxyParamCaption}
+\item[{int}]{sock, }
+\item[{char $\ast$}]{cmd}
+\end{DoxyParamCaption}
+)}}\label{server_8c_a94a11842e987c681b4f881460900b7d3}
+
+
+Process a command from the client. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sock} & The socket connected to the client. \\
+\hline
+{\em cmd} & The command received from the client. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns 0 on success, -\/1 otherwise. 
+\end{DoxyReturn}
+
+
+Definition at line 36 of file server.\-c.
+
+
+
+References logger(), and sendall().
+
+
+
+Referenced by main().
+
+\hypertarget{server_8c_a0ddf1224851353fc92bfbff6f499fa97}{\index{server.\-c@{server.\-c}!main@{main}}
+\index{main@{main}!server.c@{server.\-c}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]}}
+\end{DoxyParamCaption}
+)}}\label{server_8c_a0ddf1224851353fc92bfbff6f499fa97}
+
+
+Start the storage server. 
+
+This is the main entry point for the storage server. It reads the configuration file, starts listening on a port, and proccesses commands from clients. 
+
+Definition at line 62 of file server.\-c.
+
+
+
+References handle\-\_\-command(), logger(), M\-A\-X\-\_\-\-C\-M\-D\-\_\-\-L\-E\-N, M\-A\-X\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-L\-I\-N\-E\-\_\-\-L\-E\-N, M\-A\-X\-\_\-\-L\-I\-S\-T\-E\-N\-Q\-U\-E\-U\-E\-L\-E\-N, read\-\_\-config(), recvline(), config\-\_\-params\-::server\-\_\-host, and config\-\_\-params\-::server\-\_\-port.
+

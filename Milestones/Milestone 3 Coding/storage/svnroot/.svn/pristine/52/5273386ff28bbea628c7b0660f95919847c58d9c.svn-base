@@ -1,0 +1,14 @@
+Running suite a2-partial
+main.c:165:P:sanity:test_sanity_filemod:0: Passed
+main.c:193:P:config:test_config_onetable:0: Passed
+main.c:200:P:config:test_config_twotables:0: Passed
+main.c:207:P:config:test_config_threetables:0: Passed
+main.c:218:P:config:test_config_duplicateport:0: Passed
+main.c:241:P:conn:test_conn_basic:0: Passed
+main.c:249:P:conninvalid:test_conninvalid_disconnectinvalidparam:0: Passed
+main.c:268:P:getmissing:test_getmissing_missingtable:0: Passed
+main.c:287:P:setinvalid:test_setinvalid_badkey:0: Passed
+main.c:316:P:oneserver:test_oneserver_onetable:0: Passed
+main.c:363:P:restartclient:test_restartclient_onetable:0: Passed
+Results for all suites run:
+100%: Checks: 11, Failures: 0, Errors: 0

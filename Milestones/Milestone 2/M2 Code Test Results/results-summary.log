@@ -1,0 +1,15 @@
+Total: 38 tests pass
+1 tests pass in sanity
+8 tests pass in config
+2 tests pass in conn
+1 tests pass in conninvalid
+6 tests pass in auth
+3 tests pass in getinvalid
+2 tests pass in getmissing
+3 tests pass in setinvalid
+1 tests pass in setmissing
+3 tests pass in oneserver
+3 tests pass in restartserver
+3 tests pass in restartclient
+2 tests pass in set
+Summary: 1,8,2,1,6,3,2,3,1,3,3,3,2,

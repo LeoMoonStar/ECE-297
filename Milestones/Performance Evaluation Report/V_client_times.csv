@@ -1,0 +1,88 @@
+storage_set ,performed, in, 380 ,microseconds
+storage_set ,performed, in, 452 ,microseconds
+storage_set ,performed, in, 410 ,microseconds
+storage_set ,performed, in, 367 ,microseconds
+storage_set ,performed, in, 366 ,microseconds
+storage_set ,performed, in, 368 ,microseconds
+storage_get ,performed, in, 340 ,microseconds
+storage_set ,performed, in, 395 ,microseconds
+Total 1 gets ,performed, in, 340 ,microseconds
+Total 7 sets ,performed, in, 2738 ,microseconds
+Total 0 queries ,performed, in, 0 ,microseconds
+
+storage_get ,performed, in, 362 ,microseconds
+storage_set ,performed, in, 393 ,microseconds
+storage_get ,performed, in, 355 ,microseconds
+storage_query ,performed, in, 801 ,microseconds
+storage_get ,performed, in, 352 ,microseconds
+storage_set ,performed, in, 384 ,microseconds
+storage_set ,performed, in, 353 ,microseconds
+storage_get ,performed, in, 360 ,microseconds
+storage_set ,performed, in, 350 ,microseconds
+storage_query ,performed, in, 548 ,microseconds
+storage_get ,performed, in, 382 ,microseconds
+storage_set ,performed, in, 368 ,microseconds
+storage_get ,performed, in, 357 ,microseconds
+storage_set ,performed, in, 11 ,microseconds
+storage_set ,performed, in, 384 ,microseconds
+storage_set ,performed, in, 370 ,microseconds
+storage_set ,performed, in, 121 ,microseconds
+storage_set ,performed, in, 148 ,microseconds
+storage_query ,performed, in, 525 ,microseconds
+storage_get ,performed, in, 350 ,microseconds
+storage_get ,performed, in, 329 ,microseconds
+storage_set ,performed, in, 10 ,microseconds
+storage_set ,performed, in, 12 ,microseconds
+storage_set ,performed, in, 402 ,microseconds
+storage_get ,performed, in, 354 ,microseconds
+storage_get ,performed, in, 341 ,microseconds
+storage_query ,performed, in, 571 ,microseconds
+storage_query ,performed, in, 968 ,microseconds
+storage_set ,performed, in, 368 ,microseconds
+storage_query ,performed, in, 574 ,microseconds
+storage_set ,performed, in, 353 ,microseconds
+storage_get ,performed, in, 355 ,microseconds
+storage_query ,performed, in, 529 ,microseconds
+storage_query ,performed, in, 689 ,microseconds
+storage_get ,performed, in, 24 ,microseconds
+Total 12 gets ,performed, in, 3921 ,microseconds
+Total 13 sets ,performed, in, 3758 ,microseconds
+Total 7 queries ,performed, in, 4680 ,microseconds
+
+storage_set ,performed, in, 402 ,microseconds
+storage_query ,performed, in, 742 ,microseconds
+storage_set ,performed, in, 412 ,microseconds
+storage_query ,performed, in, 571 ,microseconds
+storage_set ,performed, in, 350 ,microseconds
+storage_get ,performed, in, 356 ,microseconds
+storage_get ,performed, in, 347 ,microseconds
+storage_set ,performed, in, 376 ,microseconds
+storage_query ,performed, in, 541 ,microseconds
+storage_set ,performed, in, 370 ,microseconds
+storage_get ,performed, in, 370 ,microseconds
+storage_set ,performed, in, 396 ,microseconds
+storage_get ,performed, in, 344 ,microseconds
+storage_get ,performed, in, 356 ,microseconds
+storage_get ,performed, in, 377 ,microseconds
+storage_set ,performed, in, 20 ,microseconds
+storage_set ,performed, in, 386 ,microseconds
+storage_query ,performed, in, 544 ,microseconds
+storage_set ,performed, in, 379 ,microseconds
+storage_query ,performed, in, 662 ,microseconds
+storage_set ,performed, in, 374 ,microseconds
+storage_get ,performed, in, 382 ,microseconds
+storage_set ,performed, in, 375 ,microseconds
+storage_set ,performed, in, 379 ,microseconds
+storage_set ,performed, in, 385 ,microseconds
+storage_set ,performed, in, 360 ,microseconds
+storage_set ,performed, in, 397 ,microseconds
+storage_query ,performed, in, 551 ,microseconds
+storage_set ,performed, in, 400 ,microseconds
+storage_set ,performed, in, 376 ,microseconds
+storage_query ,performed, in, 789 ,microseconds
+storage_get ,performed, in, 360 ,microseconds
+storage_query ,performed, in, 577 ,microseconds
+Total 1 gets ,performed, in, 360 ,microseconds
+Total 2 sets ,performed, in, 776 ,microseconds
+Total 2 queries ,performed, in, 1366 ,microseconds
+Total 0 aborts

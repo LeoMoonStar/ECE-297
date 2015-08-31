@@ -1,0 +1,925 @@
+/**
+ * @file
+ * @brief This file implements the storage server.
+ *
+ * The storage server should be named "server" and should take a single
+ * command line argument that refers to the configuration file.
+ *
+ * The storage server should be able to communicate with the client
+ * library functions declared in storage.h and implemented in storage.c.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <string.h>
+#include <assert.h>
+#include <signal.h>
+#include <time.h>
+#include "utils.h"
+#include <pthread.h>
+
+#define MAX_LISTENQUEUELEN 20	///< The maximum number of queued connections.
+#define LOGGING 1 ///< Server-side logging output stream config, 0 = Disable, 1 = STDOUT, 2 = Defined File.
+#define NO_COLLISION 0 ///< Initial collision level is 0.
+#define NO_TABLE_INDEX -1 ///< Parameter for hashing table_index
+
+/**
+ * @brief File pointer to open 'stdout' or a .txt file.
+ */
+FILE *server_log = NULL;
+char log_buffer[BUFFER_SIZE] = {0};
+
+
+/**
+ * @brief Declaring config_params with default values to check for multiple entries in
+ * config file.
+ */
+struct config_params params = {.server_host = {0}, .server_port = -1, .username = {0},
+    .password = {0}, .num_tables = 0};
+
+
+/**
+ *@brief Declaring a record with a specific value and key
+ */
+struct record {
+    char key[MAX_KEY_LEN];
+    char value[MAX_VALUE_LEN];
+    uintptr_t metadata[MAX_METADATA_LEN];
+};
+
+
+/**
+ *@brief Declaring a hashtable for storage tables
+ */
+struct hash_table {
+    struct table_schema* schema; //The table schema processed from the config file
+    struct record* records[MAX_RECORDS_PER_TABLE];
+    int hashed_keys[MAX_RECORDS_PER_TABLE];
+    int num_keys;
+};
+
+/**
+ * @brief Array of hash_table structures representing the database.
+ */
+struct hash_table* tables[MAX_TABLES];///An array of struct of hashtable pointers
+
+/**
+ * @brief Predicate structure that stores the column, operator, argument.
+ */
+struct predicate {
+    char* column_name;
+    char operator;
+    char argument[MAX_VALUE_LEN];
+    int column_id;
+};
+
+/**
+ * @brief File pointer to processing times log.
+ */
+FILE* server_time_log = NULL;
+
+/**
+ * @brief Time values and counts to measure end to end processing time.
+ */
+int n_sets = 0, n_gets = 0;
+struct timeval start_time, end_time;
+struct timeval get_processing_time = {0,0};
+struct timeval set_processing_time = {0,0};
+
+
+#define MAX_THREADS 10
+
+struct _ThreadInfo {
+    struct sockaddr_in clientaddr;
+    socklen_t clientaddrlen;
+    int clientsock;
+    pthread_t theThread;
+};
+typedef struct _ThreadInfo *ThreadInfo;
+
+/*  Thread buffer, and circular buffer fields */
+ThreadInfo runtimeThreads[MAX_THREADS];
+unsigned int botRT = 0, topRT = 0;
+
+/* Mutex to guard print statements */
+pthread_mutex_t  printMutex    = PTHREAD_MUTEX_INITIALIZER;
+
+/* Mutex to guard condition -- used in getting/returning from thread pool*/
+pthread_mutex_t conditionMutex = PTHREAD_MUTEX_INITIALIZER;
+/* Condition variable -- used to wait for avaiable threads, and signal when available */
+pthread_cond_t  conditionCond  = PTHREAD_COND_INITIALIZER;
+
+/**
+ * @brief Recursive function that converts string to index
+ *
+ * @param hash_string The string that needs to be hashed into an index
+ * @param max_index The maximum number of tables/records.
+ * @param collisions Initialized to zero and tries to find if there are any collisions in the array
+ * @return Returns integer on success
+ */
+int hash(char* hash_string, int max_index, int table_index, int collisions)
+{
+    int i;
+    int hashed_index = 0;
+    
+    for(i = 0; i < strlen(hash_string); i++)
+        hashed_index += hash_string[i] * (strlen(hash_string) - i - 1);
+    
+    hashed_index = (hashed_index + collisions) % max_index;
+    
+    // Checking for collisions
+    // Check if hashing table names
+    if(max_index == MAX_TABLES)
+    {
+        // Check if generated index is empty and not the table we are hashing
+        if(tables[hashed_index] != NULL && strcmp(tables[hashed_index]->schema->table_name, hash_string) != 0)
+            return hash(hash_string, max_index, table_index, collisions + 1);
+    }
+    
+    // Check if hashing keys
+    else if(max_index == MAX_RECORDS_PER_TABLE && tables[table_index] != NULL)
+    {
+        // Check if generated index is empty and not the key we are looking for
+        if(tables[table_index]->records[hashed_index] != NULL && strcmp(tables[table_index]->records[hashed_index]->key, hash_string) != 0)
+            return hash(hash_string, max_index, table_index, collisions + 1);
+    }
+    
+    
+    return hashed_index;
+}
+
+
+/**
+ * @brief Compares all values against predicates and find matching keys
+ *
+ * @param predicate_arr Array containing all predicates
+ * @param num_predicates Number of predicates to match values with
+ * @param matched_keys All keys that match every predicate.
+ * @return Returns 0 on success, -1 otherwise.
+ */
+int run_predicates(const struct predicate predicate_arr[], const int num_predicates, const int max_keys, const int table_index, char* matched_keys)
+{
+    // Temp array of all values indexed by column id
+    char values[tables[table_index]->schema->num_columns][MAX_VALUE_LEN];
+    memset(values, 0, sizeof values);
+    
+    char buf[MAX_VALUE_LEN] = {0};
+    char column_name[MAX_COLNAME_LEN] = {0};
+    int num_matched_keys = 0;
+    
+    int k; // Counter going through all the exisiting keys
+    for(k = 0; k < tables[table_index]->num_keys; k++)
+    {
+        // Make copy of the value at key k
+        strcpy(buf, tables[table_index]->records[tables[table_index]->hashed_keys[k]]->value);
+        
+        int column_id = 0; // Counter going though all columns in predicate array and values array
+        char* cur_column = strtok(buf, ",");
+        // Loop though all the values and store them in values array
+        while(cur_column != NULL && column_id < tables[table_index]->schema->num_columns)
+        {
+            sscanf(cur_column, "%s %[^,]", column_name, values[column_id]);
+            cur_column = strtok(NULL, ",");
+            column_id++;
+        } // Finished populating values array
+        
+        int p_index; // Counter going through all the predicates
+        bool matched = true; // Flag to find if value matches predicate
+        
+        // Break loop if any value fails to satisfy predicate for that column
+        for(p_index = 0; p_index < num_predicates && matched == true; p_index++)
+        {
+            if(tables[table_index]->schema->data_types[predicate_arr[p_index].column_id] == 0) // Integer data type predicate
+            {
+                switch(predicate_arr[p_index].operator) // Three types of comparison for integers
+                {
+                    case '<':
+                        matched = (atoi(values[predicate_arr[p_index].column_id]) < atoi(predicate_arr[p_index].argument));
+                        break;
+                        
+                    case '>':
+                        matched = (atoi(values[predicate_arr[p_index].column_id]) > atoi(predicate_arr[p_index].argument));
+                        break;
+                        
+                    case '=':
+                        matched = (atoi(values[predicate_arr[p_index].column_id]) == atoi(predicate_arr[p_index].argument));
+                        break;
+                }
+            }
+            else // String data type predicate
+                matched = (strcmp(values[predicate_arr[p_index].column_id], predicate_arr[p_index].argument) == 0);
+        } // Loop of predicates comparison. Finished matching current value against predicates
+        
+        if(matched == true) // No mismatching predicates
+        {
+            if(num_matched_keys < max_keys)
+            {
+                if(matched_keys[0] == 0) // Adding first matched key
+                    sprintf(matched_keys, "%s", tables[table_index]->records[tables[table_index]->hashed_keys[k]]->key);
+                else
+                    sprintf(matched_keys, "%s, %s", matched_keys, tables[table_index]->records[tables[table_index]->hashed_keys[k]]->key);
+            }
+            
+            num_matched_keys++;
+        } // Finished populating matched keys with current key if matched
+        
+    } // Loop of records in table
+    
+    return num_matched_keys;
+}
+
+
+/**
+ * @brief Compares username and password from shell against those defined in default.conf.
+ *
+ *  If they match then "AUTH #pass", otherwise "AUTH #fail" is passed in cmd
+ * @param cmd The command received from the client
+ * @return Returns 0 on success, -1 otherwise.
+ */
+int server_auth(char *cmd)
+{
+    char username[MAX_USERNAME_LEN] = {0}, encrypted_passwd[MAX_ENC_PASSWORD_LEN] = {0};
+    sscanf(cmd, "AUTH #%s #%s\n", username, encrypted_passwd);
+    if((strcmp(params.username, username) == 0) && (strcmp(params.password, encrypted_passwd) == 0))
+    {
+        strcpy(cmd, "AUTH #pass");
+        return 0;
+    }
+    else
+        strcpy(cmd, "AUTH #fail");
+    
+    return -1;
+}
+
+
+/**
+ * @brief Searches for a value from tables
+ *
+ * checks table name given by the user exists in default.conf
+ * checks key given by the user
+ * returns value from table if exists
+ *
+ * @param cmd The command given to the client
+ * @return Returns 0 on success, 1 otherwise.
+ */
+int server_get(char *cmd)
+{
+    char temp_table_name[MAX_TABLE_LEN] = {0}, temp_key[MAX_KEY_LEN] = {0};
+    sscanf(cmd, "GET #%s #%s\n", temp_table_name, temp_key);
+    
+    int table_index = hash(temp_table_name, MAX_TABLES, NO_TABLE_INDEX, NO_COLLISION);
+    int key_index = hash(temp_key, MAX_RECORDS_PER_TABLE, table_index, NO_COLLISION);
+    
+    if (tables[table_index] == NULL)
+        sprintf(cmd, "GET");
+    else if(tables[table_index]->records[key_index] == NULL)//checking if key exists
+        sprintf(cmd, "GET #%s", tables[table_index]->schema->table_name);
+    else
+    {
+        sprintf(cmd, "GET #%s #%s #%ld #%s", tables[table_index]->schema->table_name, tables[table_index]->records[key_index]->key, *(tables[table_index]->records[key_index]->metadata), tables[table_index]->records[key_index]->value);
+        return 0;
+    }
+    
+    return 1;
+}
+
+
+/**
+ * @brief Modifies a value in tables.
+ *
+ * checks table name given by the user exists in default.conf
+ * checks key given by the user
+ * sets value in that position
+ *
+ * @param cmd The command given to the client
+ * @return Returns 0 on success, 1 otherwise.
+ */
+int server_set(char *cmd)
+{
+    char temp_table_name[MAX_TABLE_LEN] = {0};
+    char temp_key[MAX_KEY_LEN] = {0};
+    char temp_value[MAX_VALUE_LEN] = {0};
+    char* cur_column;
+    char column_name[MAX_COLNAME_LEN] = {0};
+    char str_data[MAX_VALUE_LEN] = {0};
+    int int_data;
+    uintptr_t temp_metadata[MAX_METADATA_LEN];
+    
+    sscanf(cmd, "SET #%s #%s #%ld #%[^\n]\n", temp_table_name, temp_key, temp_metadata, temp_value); // Modified to add metadata
+    
+    int table_index = hash(temp_table_name, MAX_TABLES, NO_TABLE_INDEX, NO_COLLISION);
+    int key_index = hash(temp_key, MAX_RECORDS_PER_TABLE, table_index, NO_COLLISION);
+    
+    if (tables[table_index] == NULL) // Table does not exist
+        sprintf(cmd, "SET");
+    else if(strcmp(temp_value, "NULL") == 0) // Deleting a record?
+    {
+        if(tables[table_index]->records[key_index] == NULL) // Key/Record do not exist
+            sprintf(cmd, "SET #%s", tables[table_index]->schema->table_name);
+        else
+        {
+            free(tables[table_index]->records[key_index]); // Delete record
+            tables[table_index]->records[key_index] = NULL;
+            
+            int k;
+            for(k = 0; k < tables[table_index]->num_keys; k++)
+                if(tables[table_index]->hashed_keys[k] == key_index)
+                {
+                    tables[table_index]->hashed_keys[k] = tables[table_index]->hashed_keys[tables[table_index]->num_keys];
+                    tables[table_index]->hashed_keys[tables[table_index]->num_keys] = -1;
+                    tables[table_index]->num_keys--;
+                    break;
+                }
+            
+            sprintf(cmd, "SET #%s #%s #%ld #%s", temp_table_name, temp_key, *temp_metadata, temp_value);
+            return 0;
+        }
+    }
+    else // Table exists and we are not deleting a record
+    {
+        int column_id = 0; // Counting through number of arguments (comma separated) in value
+        char buf[MAX_VALUE_LEN] = {0};
+        strcpy(buf, temp_value);
+        cur_column = strtok(buf, ","); // Get tokens from a string delimited with commas
+        bool invalid = false;
+        while (invalid == false && cur_column != NULL && column_id < tables[table_index]->schema->num_columns)
+        {
+            // Format from design specifications (spaces before and after commas are allowed)
+            if(tables[table_index]->schema->data_types[column_id] == 0) //Expecting an integer
+            {
+                if(sscanf(cur_column, " %[a-zA-Z0-9] %d", column_name, &int_data) != 2)
+                    invalid = true;
+            }
+            else
+                sscanf(cur_column, " %[a-zA-Z0-9] %[a-zA-Z0-9 ]", column_name, str_data);
+            
+            // Column name in value does not match column name in table at current position
+            if(invalid == false && strcmp(tables[table_index]->schema->column_names[column_id], column_name) != 0)
+                invalid = true;
+            else if(tables[table_index]->schema->data_types[column_id] != 0) // Expecting a string
+                if((strlen(str_data) + 1) > tables[table_index]->schema->data_types[column_id]) // String size does not match
+                    invalid = true;
+            
+            column_id++;
+            cur_column = strtok(NULL, ",");
+        }
+        
+        if(invalid == true || column_id != tables[table_index]->schema->num_columns || cur_column != NULL) // Less/more column names specified in value
+            sprintf(cmd, "SET #%s #%s #%ld #invalid", temp_table_name, temp_key, *temp_metadata);
+        else
+        {
+            // Key/Record do not exist and no GET performed before SET (to create record)
+            if(tables[table_index]->records[key_index] == NULL && *temp_metadata == 0)
+            {
+                tables[table_index]->records[key_index] = (struct record*) malloc(sizeof(struct record));
+                strcpy(tables[table_index]->records[key_index]->key, temp_key);
+                tables[table_index]->hashed_keys[tables[table_index]->num_keys] = key_index; // Add new key_index to hashed_array
+                tables[table_index]->num_keys++; // Increment number of keys
+                *(tables[table_index]->records[key_index]->metadata) = table_index; // Initialising metadata
+            }
+            
+            if(tables[table_index]->records[key_index] != NULL)
+            {
+                // Forced update or metadata matches
+                if(*temp_metadata == 0 || *(tables[table_index]->records[key_index]->metadata) == *temp_metadata)
+                {
+                    strcpy(tables[table_index]->records[key_index]->value, temp_value);
+                    srand(time(NULL));
+                    *(tables[table_index]->records[key_index]->metadata) += rand() % MAX_PREDICATE_LEN; // Increment metadata after setting
+                    sprintf(cmd, "SET #%s #%s #%ld #%s", tables[table_index]->schema->table_name, tables[table_index]->records[key_index]->key, *(tables[table_index]->records[key_index]->metadata), tables[table_index]->records[key_index]->value);
+                }
+                else
+                    sprintf(cmd, "SET #%s #%s #0 #abort", temp_table_name, temp_key);
+                
+            }
+            else
+                sprintf(cmd, "SET #%s #%s #0 #abort", temp_table_name, temp_key);
+            
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+/**
+ * @brief Query the table for records, and retrieve the matching keys.
+ *
+ * @param cmd The command given to the client
+ *
+ */
+int server_query(char *cmd)
+{
+    int max_keys;
+    int int_data;
+    char operator;
+    char column_name[MAX_COLNAME_LEN] = {0};
+    char temp_table_name[MAX_TABLE_LEN] = {0};
+    char str_data[MAX_VALUE_LEN] = {0};
+    char predicates[MAX_PREDICATE_LEN] = {0};
+    char trash[MAX_CONFIG_LINE_LEN] = {0};
+    
+    // Read from protocol
+    sscanf(cmd, "QUERY #%s #%d #%[^\n]", temp_table_name, &max_keys, predicates);
+    
+    int table_index = hash(temp_table_name, MAX_TABLES, NO_TABLE_INDEX, NO_COLLISION);
+    
+    if (tables[table_index] == NULL) // Table does not exist
+        sprintf(cmd, "QUERY");
+    else // Given valid table name and predicates
+    {
+        bool invalid = false; // Flag to break from parsing predicates
+        struct predicate predicate_arr[tables[table_index]->schema->num_columns]; // Array of all valid predicates
+        int num_predicates = 0; // Total number of valid predicates
+        int column_id;
+        // Parse each predicate and if valid, store into the predicates array
+        char* cur_pred = strtok(predicates, ",");
+        while(cur_pred != NULL && invalid == false) // Get tokens from predicates
+        {
+            // Expecting an integer predicate
+            if(sscanf(cur_pred, " %[a-zA-Z0-9] %1[<=>] %d%s", column_name, &operator, &int_data, trash) == 3)
+            {
+                // Loop through all column names
+                // Find the column_id in the table with same column name as scanned from predicate
+                for(column_id = 0; column_id < tables[table_index]->schema->num_columns; column_id++)
+                    // Found column id of the column name scanned
+                    if(strcmp(tables[table_index]->schema->column_names[column_id], column_name) == 0)
+                        break;
+                
+                // Check if reached end of the loop, meaning couldn't find column_name in the table
+                if(column_id == tables[table_index]->schema->num_columns)
+                    invalid = true;
+                
+                // Check if data_type of column matches our original expected data_type
+                else if(tables[table_index]->schema->data_types[column_id] != 0)
+                    invalid = true;
+            }
+            
+            else // Expecting a string predicate
+            {
+                sscanf(cur_pred, " %[a-zA-Z0-9] %1[=] %[a-zA-Z0-9 ]", column_name, &operator, str_data);
+                
+                // Loop through all column names
+                // Find the column_id in the table with same name as scanned column_name
+                for(column_id = 0; column_id < tables[table_index]->schema->num_columns; column_id++)
+                    // Found column id of the column name scanned
+                    if(strcmp(tables[table_index]->schema->column_names[column_id], column_name) == 0)
+                        break;
+                
+                // Check if reached end of the for loop, meaning couldn't find column_name in the table
+                if(column_id == tables[table_index]->schema->num_columns)
+                    invalid = true;
+                
+                // Check if string length of parsed data is more than that allowed
+                else if((strlen(str_data) + 1) > tables[table_index]->schema->data_types[column_id])
+                    invalid = true;
+            }
+            
+            int i;
+            for(i = 0; i < num_predicates; i++)
+                if(column_id == predicate_arr[i].column_id) // Checking for duplicate predicates
+                    invalid = true;
+            
+            if(num_predicates == tables[table_index]->schema->num_columns) // Checking for extra predicates
+                invalid = true;
+            
+            if(invalid == false) // Found a valid predicate, so put into predicate struct array
+            {
+                predicate_arr[num_predicates].column_id = column_id;
+                predicate_arr[num_predicates].column_name = tables[table_index]->schema->column_names[column_id];
+                predicate_arr[num_predicates].operator = operator;
+                
+                if(tables[table_index]->schema->data_types[column_id] == 0) // Integer data type
+                    sprintf(predicate_arr[num_predicates].argument, "%d", int_data);
+                else // String data type
+                    strcpy(predicate_arr[num_predicates].argument, str_data);
+                
+                num_predicates++; // Increment number of valid predicates read
+            }
+            cur_pred = strtok(NULL, ",");
+        }
+        // End of parsing valid predicates from protocol into array of predicate structs
+        
+        if(invalid == true) // -1 signifies invalid predicates in client library
+            sprintf(cmd, "QUERY #%s #-1", temp_table_name);
+        else // Valid predicates and actually finding records that satify them
+        {
+            char matched_keys[max_keys * MAX_KEY_LEN];
+            memset(matched_keys, 0, sizeof matched_keys);
+            int num_matched_keys = run_predicates(predicate_arr, num_predicates, max_keys, table_index, matched_keys);
+            sprintf(cmd, "QUERY #%s #%d #%s", tables[table_index]->schema->table_name, num_matched_keys, matched_keys);
+            return 0;
+        }
+    }
+    
+    return 1;
+}
+
+/**
+ * @brief Creates table for tables
+ *
+ * This function creates tables for all the table names in the config file and hashes them according to their integer index in an array of struct hash_table pointers.
+ * @return Returns 0 on success, -1 otherwise.
+ */
+int create_tables()
+{
+    int i, j, table_index;
+    
+    for(i = 0; i < MAX_TABLES; i++)
+        tables[i] = NULL;
+    
+    for(i = 0; i < params.num_tables; i++)
+    {
+        table_index = hash(params.table_schemas[i].table_name, MAX_TABLES, NO_TABLE_INDEX, NO_COLLISION);//making a hash key -> converting string table name to integer index
+        tables[table_index] = (struct hash_table*) malloc(sizeof (struct hash_table));//making a hash_table pointer
+        tables[table_index]->schema = &(params.table_schemas[i]); //Store the config file settings into this table
+        tables[table_index]->num_keys = 0;
+        
+        for(j = 0; j < MAX_RECORDS_PER_TABLE; j++)
+        {
+            tables[table_index]->records[j] = NULL;
+            tables[table_index]->hashed_keys[j] = -1;
+        }
+    }
+    
+    return 0;
+}
+
+
+/**
+ * @brief Deleting the tables.
+ *
+ */
+int delete_tables()
+{
+    int i, j;
+    
+    for(i = 0; i < MAX_TABLES; i++)
+        if(tables[i] != NULL)
+        {
+            for(j = 0; j < MAX_RECORDS_PER_TABLE; j++)
+                if(tables[i]->records[j] != NULL)
+                {
+                    free(tables[i]->records[j]);
+                    tables[i]->records[j] = NULL;
+                }
+            free(tables[i]);
+            tables[i] = NULL;
+        }
+    
+    return 0;
+}
+
+
+/**
+ * @brief Populates the census data from the data dir.
+ *
+ */
+int populate_census(char* config_path)
+{
+    int error_occurred = 0;
+    char data_file[MAX_PATH_LEN] = {0};
+    
+    sscanf(config_path, "%[^.].csv", data_file);
+    
+    // Open file for reading.
+    FILE *file = fopen(data_file, "r");
+    if (file == NULL)
+        error_occurred = 1;
+    
+    // Process the config file.
+    while (!error_occurred && !feof(file))
+    {
+        // Read a line from the file.
+        char key[MAX_KEY_LEN] = {0}, value[MAX_VALUE_LEN] = {0};
+        fscanf(file, "%[^,],%s", key, value);
+        make_key(key);
+        make_value(value);
+        // Send some data.
+        char buf[MAX_CMD_LEN] = {0};
+        snprintf(buf, sizeof buf, "SET #%.19s #%.19s #0 #%.799s", data_file, key, value);
+        error_occurred = server_set(buf);
+    }
+    
+    return error_occurred ? -1 : 0;
+}
+
+
+/**
+ * @brief Processes commands from client shell and passes them to server_auth, server_get or server_set.
+ *
+ * @param sock The socket connected to the client.
+ * @param cmd The command received from the client.
+ * @return Returns 0 on success, 1 otherwise.
+ */
+int handle_command(int sock, char *cmd)
+{
+    sprintf(log_buffer, "handle_command: Processing command '%s'\n", cmd);
+    logger(server_log, log_buffer); // replace LOG commands with logger() calls
+    
+    char buf[MAX_CMD_LEN] = {0};
+    
+    if(sscanf(cmd, "%s", buf) != 1)
+        return 0;
+    else if(strcmp(buf, "AUTH") == 0)
+        server_auth(cmd);
+    else if(strcmp(buf, "GET") == 0)
+    {
+        n_gets++;
+        gettimeofday(&start_time, NULL);
+        server_get(cmd);
+        gettimeofday(&end_time, NULL);
+        get_processing_time.tv_usec += (end_time.tv_sec - start_time.tv_sec)*1000000L + (end_time.tv_usec - start_time.tv_usec);
+        sprintf(log_buffer, "server_get performed in %ld microseconds\n", (end_time.tv_sec - start_time.tv_sec)*1000000L + (end_time.tv_usec - start_time.tv_usec));
+        logger(server_time_log, log_buffer);
+        
+    }
+    else if(strcmp(buf, "SET") == 0)
+    {
+        n_sets++;
+        gettimeofday(&start_time, NULL);
+        server_set(cmd);
+        gettimeofday(&end_time, NULL);
+        set_processing_time.tv_usec += (end_time.tv_sec - start_time.tv_sec)*1000000L + (end_time.tv_usec - start_time.tv_usec);
+        sprintf(log_buffer, "server_set performed in %ld microseconds\n", (end_time.tv_sec - start_time.tv_sec)*1000000L + (end_time.tv_usec - start_time.tv_usec));
+        logger(server_time_log, log_buffer);
+        
+    }
+    else if(strcmp(buf, "QUERY") == 0)
+        server_query(cmd);
+    else
+        return 1;
+    
+    // Send back the response to the client.
+    sendall(sock, cmd, strlen(cmd));
+    sendall(sock, "\n", 1);
+    
+    return 0;
+}
+
+
+ThreadInfo getThreadInfo(void) {
+    ThreadInfo currThreadInfo = NULL;
+    
+    /* Wait as long as there are no more threads in the buffer */
+    pthread_mutex_lock( &conditionMutex );
+    while (((botRT+1)%MAX_THREADS)==topRT)
+        pthread_cond_wait(&conditionCond,&conditionMutex);
+    
+    /* At this point, there is at least one thread available for us. We
+     take it, and update the circular buffer  */
+    currThreadInfo = runtimeThreads[botRT];
+    botRT = (botRT + 1)%MAX_THREADS;
+    
+    /* Release the mutex, so other clients can add threads back */
+    pthread_mutex_unlock( &conditionMutex );
+    
+    return currThreadInfo;
+}
+
+/* Function called when thread is about to finish -- unless it is
+ called, the ThreadInfo assigned to it is lost */
+void releaseThread(ThreadInfo me) {
+    pthread_mutex_lock( &conditionMutex );
+    assert( botRT!=topRT );
+    
+    runtimeThreads[topRT] = me;
+    topRT = (topRT + 1)%MAX_THREADS;
+    
+    /* tell getThreadInfo a new thread is available */
+    pthread_cond_signal( &conditionCond );
+    
+    /* Release the mutex, so other clients can get new threads */
+    pthread_mutex_unlock( &conditionMutex );
+}
+
+/* Prototype for the thread callback function :
+ void * funcion_name( void *argument ) */
+
+/* This function receives a string from clients and echoes it back --
+ the thread is released when the thread is finished */
+void * threadCallFunction(void *arg) {
+    ThreadInfo tiInfo = (ThreadInfo)arg;
+    char buffer[50];
+    int  length;
+    recvline( tiInfo->clientsock, &buffer[0], 48 );
+    length = strlen(buffer);
+    buffer[length] = '\n';
+    buffer[length+1] = 0;
+    sendall( tiInfo->clientsock, &buffer[0], length+1 );
+    
+    if (close(tiInfo->clientsock)<0) {
+        pthread_mutex_lock( &printMutex );
+        printf("ERROR in closing socket to %s:%d.\n",
+               inet_ntoa(tiInfo->clientaddr.sin_addr), tiInfo->clientaddr.sin_port);
+        pthread_mutex_unlock( &printMutex );
+    }
+    releaseThread( tiInfo );
+    return NULL;
+}
+
+
+/**
+ * @brief Start the storage server.
+ *
+ * This is the main entry point for the storage server.  It reads the
+ * configuration file, starts listening on a port, and proccesses
+ * commands from clients.
+ */
+int main(int argc, char *argv[])
+{
+    int port, listensocket, status;
+    unsigned int i;
+    struct sockaddr_in listenaddr;
+    
+    char file_name[MAX_LOG_NAME] = "Server";
+    
+    if(TIME_EVAL == 1)
+        server_time_log = fopen("server_times.log", "a");
+    
+    switch (LOGGING)
+    {
+        case 0:
+            server_log = NULL;
+            break;
+            
+        case 1:
+            server_log = stdout;
+            break;
+            
+        case 2:
+            server_log = fopen(generate_logfile(file_name), "w");
+            break;
+    }
+    
+    // Process command line arguments.
+    // This program expects exactly one argument: the config file name.
+    //assert(argc > 0);
+    if (argc != 2)
+    {
+        printf("Usage %s <config_file>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+    char *config_file = argv[1];
+    
+    // Read the config file.
+    
+    status = read_config(config_file, &params);
+    if (status != 0)
+    {
+        printf("Error processing config file\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    
+    sprintf(log_buffer, "server main: Server on %s:%d\n", params.server_host, params.server_port);
+    logger(server_log, log_buffer);
+    
+    // Create a socket.
+    int listensock = socket(PF_INET, SOCK_STREAM, 0);
+    if (listensock < 0)
+    {
+        printf("Error creating socket\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Allow listening port to be reused if defunct.
+    int yes = 1;
+    status = setsockopt(listensock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
+    if (status != 0)
+    {
+        printf("Error configuring socket\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Bind it to the listening port.
+    //struct sockaddr_in listenaddr;
+    memset(&listenaddr, 0, sizeof listenaddr);
+    listenaddr.sin_family = AF_INET;
+    listenaddr.sin_port = htons(params.server_port);
+    inet_pton(AF_INET, params.server_host, &(listenaddr.sin_addr)); // bind to local IP address
+    status = bind(listensock, (struct sockaddr*) &listenaddr, sizeof listenaddr);
+    if (status != 0)
+    {
+        printf("Error binding socket\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Listen for connections.
+    status = listen(listensock, MAX_LISTENQUEUELEN);
+    if (status != 0)
+    {
+        printf("Error listening on socket\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    status = create_tables();
+    if (status != 0)
+    {
+        printf("Error creating tables\n");
+        delete_tables();
+        exit(EXIT_FAILURE);
+    }
+    
+    // Load census data file into storage server
+    if(strcmp(params.table_schemas[0].table_name, "census") == 0)
+    {
+        status = populate_census(config_file);
+        if(status != 0)
+        {
+            printf("Error populating tables\n");
+            delete_tables();
+            exit(EXIT_FAILURE);
+        }
+    }
+    
+    for (i = 0; i!=MAX_THREADS; ++i)
+        runtimeThreads[i] = malloc( sizeof( struct _ThreadInfo ) );    
+    
+    while (1) {
+        ThreadInfo tiInfo = getThreadInfo();
+        tiInfo->clientaddrlen = sizeof(struct sockaddr_in);
+        tiInfo->clientsock = accept(listensocket, (struct sockaddr*)&tiInfo->clientaddr, &tiInfo->clientaddrlen);
+        if (tiInfo->clientsock <0) {
+            pthread_mutex_lock( &printMutex );
+            printf("ERROR in connecting to %s:%d.\n",
+                   inet_ntoa(tiInfo->clientaddr.sin_addr), tiInfo->clientaddr.sin_port);
+            pthread_mutex_unlock( &printMutex );
+        } else {
+            // Read a line from the client.
+            char cmd[MAX_CMD_LEN] = {0};
+            status = recvline(clientsock, cmd, MAX_CMD_LEN);
+            pthread_create( &tiInfo->theThread, NULL, handle_command(clientsock, cmd), tiInfo );
+        }
+    }
+    
+    // Listen loop.
+    int wait_for_connections = 1;
+    while (wait_for_connections)
+    {
+        // Wait for a connection.
+        struct sockaddr_in clientaddr;
+        socklen_t clientaddrlen = sizeof clientaddr;
+        int clientsock = accept(listensock, (struct sockaddr*)&clientaddr, &clientaddrlen);
+        if (clientsock < 0)
+        {
+            printf("Error accepting a connection\n");
+            delete_tables();
+            exit(EXIT_FAILURE);
+        }
+        
+        
+        sprintf(log_buffer, "server main: Got a connection from %s:%d\n", inet_ntoa(clientaddr.sin_addr), clientaddr.sin_port);
+        logger(server_log, log_buffer);
+        
+        // Get commands from client.
+        int wait_for_commands = 1;
+        do
+        {
+            // Read a line from the client.
+            char cmd[MAX_CMD_LEN] = {0};
+            status = recvline(clientsock, cmd, MAX_CMD_LEN);
+            if (status != 0)
+            {
+                // Either an error occurred or the client closed the connection.
+                wait_for_commands = 0;
+            }
+            else
+            {
+                // Handle the command from the client.
+                status = handle_command(clientsock, cmd);
+                if (status != 0)
+                    wait_for_commands = 0; // Oops.  An error occured.
+            }
+        }
+        while (wait_for_commands);
+        
+        // Close the connection with the client.
+        close(clientsock);
+        
+        
+        sprintf(log_buffer, "server main: Closed connection from %s:%d\n", inet_ntoa(clientaddr.sin_addr), clientaddr.sin_port);
+        logger(server_log, log_buffer);
+        
+        sprintf(log_buffer, "Total %d gets performed in %ld microseconds\n", n_gets, get_processing_time.tv_usec);
+        logger(server_time_log, log_buffer);
+        sprintf(log_buffer, "Total %d sets performed in %ld microseconds\n", n_sets, set_processing_time.tv_usec);
+        logger(server_time_log, log_buffer);
+    }
+    
+    // Stop listening for connections.
+    close(listensock);
+    
+    
+    fclose(server_time_log);
+    
+    delete_tables();
+    fclose(server_log);
+    
+    return EXIT_SUCCESS;
+}

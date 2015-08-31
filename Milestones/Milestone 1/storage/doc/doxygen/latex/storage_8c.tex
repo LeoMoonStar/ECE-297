@@ -1,0 +1,175 @@
+\hypertarget{storage_8c}{\section{storage.\-c File Reference}
+\label{storage_8c}\index{storage.\-c@{storage.\-c}}
+}
+
+
+This file contains the implementation of the storage server interface as specified in \hyperlink{storage_8h}{storage.\-h}.  
+
+
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$sys/socket.\-h$>$}\\*
+{\ttfamily \#include $<$netdb.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}storage.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}utils.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void $\ast$ \hyperlink{storage_8c_abc3751ffba629aad5a4b8c7c22a75e11}{storage\-\_\-connect} (const char $\ast$hostname, const int port)
+\begin{DoxyCompactList}\small\item\em Establish a connection to the server. \end{DoxyCompactList}\item 
+int \hyperlink{storage_8c_aa97b5545b3eefb5055a4e6febd375796}{storage\-\_\-auth} (const char $\ast$username, const char $\ast$passwd, void $\ast$conn)
+\begin{DoxyCompactList}\small\item\em This is just a minimal stub implementation. You should modify it according to your design. \end{DoxyCompactList}\item 
+int \hyperlink{storage_8c_ac75689ee50898a2f6580c6489e886b59}{storage\-\_\-get} (const char $\ast$table, const char $\ast$key, struct \hyperlink{structstorage__record}{storage\-\_\-record} $\ast$record, void $\ast$conn)
+\begin{DoxyCompactList}\small\item\em This is just a minimal stub implementation. You should modify it according to your design. \end{DoxyCompactList}\item 
+int \hyperlink{storage_8c_a8a42f72670cdcd7bf83416df1f1b090d}{storage\-\_\-set} (const char $\ast$table, const char $\ast$key, struct \hyperlink{structstorage__record}{storage\-\_\-record} $\ast$record, void $\ast$conn)
+\begin{DoxyCompactList}\small\item\em This is just a minimal stub implementation. You should modify it according to your design. \end{DoxyCompactList}\item 
+int \hyperlink{storage_8c_acd449536193542befbae2ff5e916f657}{storage\-\_\-disconnect} (void $\ast$conn)
+\begin{DoxyCompactList}\small\item\em This is just a minimal stub implementation. You should modify it according to your design. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{storage_8c_a0aa47e573fb0de4783add2c6d61ca18a}{F\-I\-L\-E $\ast$ \hyperlink{storage_8c_a0aa47e573fb0de4783add2c6d61ca18a}{Client\-File}}\label{storage_8c_a0aa47e573fb0de4783add2c6d61ca18a}
+
+\begin{DoxyCompactList}\small\item\em This is just a minimal stub implementation. You should modify it according to your design. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This file contains the implementation of the storage server interface as specified in \hyperlink{storage_8h}{storage.\-h}. 
+
+Definition in file \hyperlink{storage_8c_source}{storage.\-c}.
+
+
+
+\subsection{Function Documentation}
+\hypertarget{storage_8c_aa97b5545b3eefb5055a4e6febd375796}{\index{storage.\-c@{storage.\-c}!storage\-\_\-auth@{storage\-\_\-auth}}
+\index{storage\-\_\-auth@{storage\-\_\-auth}!storage.c@{storage.\-c}}
+\subsubsection[{storage\-\_\-auth}]{\setlength{\rightskip}{0pt plus 5cm}int storage\-\_\-auth (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{username, }
+\item[{const char $\ast$}]{passwd, }
+\item[{void $\ast$}]{conn}
+\end{DoxyParamCaption}
+)}}\label{storage_8c_aa97b5545b3eefb5055a4e6febd375796}
+
+
+This is just a minimal stub implementation. You should modify it according to your design. 
+
+Authenticate the client's connection to the server. 
+
+Definition at line 70 of file storage.\-c.
+
+
+
+References Client\-File, generate\-\_\-encrypted\-\_\-password(), logger(), M\-A\-X\-\_\-\-C\-M\-D\-\_\-\-L\-E\-N, recvline(), and sendall().
+
+
+
+Referenced by main().
+
+\hypertarget{storage_8c_abc3751ffba629aad5a4b8c7c22a75e11}{\index{storage.\-c@{storage.\-c}!storage\-\_\-connect@{storage\-\_\-connect}}
+\index{storage\-\_\-connect@{storage\-\_\-connect}!storage.c@{storage.\-c}}
+\subsubsection[{storage\-\_\-connect}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ storage\-\_\-connect (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{hostname, }
+\item[{const int}]{port}
+\end{DoxyParamCaption}
+)}}\label{storage_8c_abc3751ffba629aad5a4b8c7c22a75e11}
+
+
+Establish a connection to the server. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em hostname} & The I\-P address or hostname of the server. \\
+\hline
+{\em port} & The T\-C\-P port of the server. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+If successful, return a pointer to a data structure that represents a connection to the server. Otherwise return N\-U\-L\-L.
+\end{DoxyReturn}
+On error, errno will be set to one of the following, as appropriate\-: E\-R\-R\-\_\-\-I\-N\-V\-A\-L\-I\-D\-\_\-\-P\-A\-R\-A\-M, E\-R\-R\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-A\-I\-L, or E\-R\-R\-\_\-\-U\-N\-K\-N\-O\-W\-N. 
+
+Definition at line 27 of file storage.\-c.
+
+
+
+References Client\-File, logger(), and M\-A\-X\-\_\-\-P\-O\-R\-T\-\_\-\-L\-E\-N.
+
+
+
+Referenced by main().
+
+\hypertarget{storage_8c_acd449536193542befbae2ff5e916f657}{\index{storage.\-c@{storage.\-c}!storage\-\_\-disconnect@{storage\-\_\-disconnect}}
+\index{storage\-\_\-disconnect@{storage\-\_\-disconnect}!storage.c@{storage.\-c}}
+\subsubsection[{storage\-\_\-disconnect}]{\setlength{\rightskip}{0pt plus 5cm}int storage\-\_\-disconnect (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{conn}
+\end{DoxyParamCaption}
+)}}\label{storage_8c_acd449536193542befbae2ff5e916f657}
+
+
+This is just a minimal stub implementation. You should modify it according to your design. 
+
+Close the connection to the server. 
+
+Definition at line 170 of file storage.\-c.
+
+
+
+Referenced by main().
+
+\hypertarget{storage_8c_ac75689ee50898a2f6580c6489e886b59}{\index{storage.\-c@{storage.\-c}!storage\-\_\-get@{storage\-\_\-get}}
+\index{storage\-\_\-get@{storage\-\_\-get}!storage.c@{storage.\-c}}
+\subsubsection[{storage\-\_\-get}]{\setlength{\rightskip}{0pt plus 5cm}int storage\-\_\-get (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{table, }
+\item[{const char $\ast$}]{key, }
+\item[{struct {\bf storage\-\_\-record} $\ast$}]{record, }
+\item[{void $\ast$}]{conn}
+\end{DoxyParamCaption}
+)}}\label{storage_8c_ac75689ee50898a2f6580c6489e886b59}
+
+
+This is just a minimal stub implementation. You should modify it according to your design. 
+
+Retrieve the value associated with a key in a table. 
+
+Definition at line 104 of file storage.\-c.
+
+
+
+References Client\-File, logger(), M\-A\-X\-\_\-\-C\-M\-D\-\_\-\-L\-E\-N, recvline(), sendall(), and storage\-\_\-record\-::value.
+
+
+
+Referenced by main().
+
+\hypertarget{storage_8c_a8a42f72670cdcd7bf83416df1f1b090d}{\index{storage.\-c@{storage.\-c}!storage\-\_\-set@{storage\-\_\-set}}
+\index{storage\-\_\-set@{storage\-\_\-set}!storage.c@{storage.\-c}}
+\subsubsection[{storage\-\_\-set}]{\setlength{\rightskip}{0pt plus 5cm}int storage\-\_\-set (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{table, }
+\item[{const char $\ast$}]{key, }
+\item[{struct {\bf storage\-\_\-record} $\ast$}]{record, }
+\item[{void $\ast$}]{conn}
+\end{DoxyParamCaption}
+)}}\label{storage_8c_a8a42f72670cdcd7bf83416df1f1b090d}
+
+
+This is just a minimal stub implementation. You should modify it according to your design. 
+
+Store a key/value pair in a table. 
+
+Definition at line 138 of file storage.\-c.
+
+
+
+References Client\-File, logger(), M\-A\-X\-\_\-\-C\-M\-D\-\_\-\-L\-E\-N, recvline(), sendall(), and storage\-\_\-record\-::value.
+
+
+
+Referenced by main().
+

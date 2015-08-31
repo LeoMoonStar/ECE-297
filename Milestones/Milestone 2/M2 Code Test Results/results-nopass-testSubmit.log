@@ -1,0 +1,2 @@
+main.c:254:E:conninvalid:test_conninvalid_connectinvalidparam:0: (after this point) Received signal 11 (Segmentation fault)
+main.c:279:E:getinvalid:test_getinvalid_invalidtable:0: (after this point) Received signal 11 (Segmentation fault)

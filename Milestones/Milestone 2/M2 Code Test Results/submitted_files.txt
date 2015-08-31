@@ -1,0 +1,32 @@
+MD5 checksum
+245c3df56e08ec14551493ba7b82af6d  storage-asst2.tgz
+==== tar file content ====
+storage-asst2/
+storage-asst2/data/
+storage-asst2/data/census
+storage-asst2/data/census.conf
+storage-asst2/test/
+storage-asst2/test/a1-partial/
+storage-asst2/test/a1-partial/main.c
+storage-asst2/test/a1-partial/conf-duplicateport.conf
+storage-asst2/test/a1-partial/md5sum.check
+storage-asst2/test/a1-partial/conf-threetables.conf
+storage-asst2/test/a1-partial/conf-twotables.conf
+storage-asst2/test/a1-partial/Makefile
+storage-asst2/test/a1-partial/conf-onetable.conf
+storage-asst2/test/Makefile.common
+storage-asst2/test/Makefile
+storage-asst2/Makefile
+storage-asst2/doc/
+storage-asst2/doc/Makefile
+storage-asst2/doc/doxygen.conf
+storage-asst2/src/
+storage-asst2/src/storage.c
+storage-asst2/src/encrypt_passwd.c
+storage-asst2/src/utils.h
+storage-asst2/src/server.c
+storage-asst2/src/default.conf
+storage-asst2/src/storage.h
+storage-asst2/src/Makefile
+storage-asst2/src/client.c
+storage-asst2/src/utils.c

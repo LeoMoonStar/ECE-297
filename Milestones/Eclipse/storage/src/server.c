@@ -1,0 +1,392 @@
+/**
+ * @file
+ * @brief This file implements the storage server.
+ *
+ * The storage server should be named "server" and should take a single
+ * command line argument that refers to the configuration file.
+ *
+ * The storage server should be able to communicate with the client
+ * library functions declared in storage.h and implemented in storage.c.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <string.h>
+#include <assert.h>
+#include <signal.h>
+#include <time.h>
+#include "utils.h"
+
+#define MAX_LISTENQUEUELEN 20	///< The maximum number of queued connections.
+#define LOGGING 1 ///< Server-side logging output stream config, 0 = Disable, 1 = STDOUT, 2 = Defined File.
+
+/**
+ * @brief File pointer to open 'stdout' or a .txt file.
+ */
+FILE *server_log = NULL;
+char buffer[BUFFER_SIZE];
+/*
+ * @brief Declaring config_params with default values to check for multiple entries in
+ * config file.
+ */
+struct config_params params = {.server_host = "\0", .server_port = -1, .username = "\0",
+    .password = "\0", .num_tables = 0};
+
+/**
+ *@brief Declaring a hashtable for storage database
+ */
+
+struct hash_table {
+    char table_name[MAX_TABLE_LEN];///Table Name
+    char values[MAX_RECORDS_PER_TABLE][MAX_VALUE_LEN];///An array of strings
+};
+
+
+struct hash_table* database [MAX_TABLES];///An array of struct of hashtable pointers
+
+
+/**
+ * @brief Converts string to index
+ *
+ * @param string_to_index
+ * @return Returns integer on success
+ */
+int hash(char* key, int max_index)
+{
+    int i;
+    int hashed_index = 0;
+    for(i = 0; i < strlen(key); i++)
+        hashed_index += key[i];
+    
+    return hashed_index % max_index;
+    
+}
+
+
+
+/**
+ * @brief Compares username and password from shell against those defined in default.conf.
+ *
+ *  If they match then "AUTH #pass", otherwise "AUTH #fail" is passed in cmd
+ * @param cmd The command received from the client
+ * @return Returns 0 on success, -1 otherwise.
+ */
+
+int server_auth(char *cmd)
+{
+    char username[MAX_USERNAME_LEN], encrypted_passwd[MAX_ENC_PASSWORD_LEN];
+    sscanf(cmd, "AUTH #%s #%s", username, encrypted_passwd);
+    if((strcmp(params.username, username) == 0) && (strcmp(params.password, encrypted_passwd) == 0))
+    {
+        strcpy(cmd, "AUTH #pass");
+        return 0;
+    }
+    else
+        strcpy(cmd, "AUTH #fail");
+    
+    return -1;
+}
+
+/**
+ * @brief Searches for a value from database
+ *
+ * checks table name given by the user exists in default.conf
+ * checks key given by the user exists in default.conf
+ * returns value from table
+ *
+ * @param cmd The command received from the client
+ * @return Returns 0 on success, -1 otherwise.
+ */
+
+
+int server_get(char *cmd)
+{
+    char temp_table_name[MAX_TABLE_LEN], temp_key[MAX_KEY_LEN];
+    sscanf(cmd, "GET #%s #%s", temp_table_name, temp_key);
+    
+    int table_index = hash(temp_table_name, MAX_TABLES);
+    int key_index = hash(temp_key, MAX_RECORDS_PER_TABLE);
+    
+    if (database[table_index] == NULL)
+        sprintf(cmd, "GET");
+    else if(strcmp(database[table_index]->values[key_index], "NULL") == 0)//checking if key exists
+        sprintf(cmd, "GET #%s", temp_table_name);
+    else if(strcmp(database[table_index]->table_name, temp_table_name) == 0)//checking if the table name exists and then printing
+    {
+        sprintf(cmd, "GET #%s #%s #%s", temp_table_name, temp_key, database[table_index]->values[key_index]);
+        return 0;
+    }
+    
+    return 1;
+}
+
+/**
+ * @brief Modifies a value in database.
+ *
+ * checks table name given by the user exists in default.conf
+ * checks key given by the user exists in default.conf
+ * sets value in that position
+ *
+ * @param cmd The command received from the client
+ * @return Returns 0 on success, -1 otherwise.
+ */
+
+int server_set(char *cmd)
+{
+    char temp_table_name[MAX_TABLE_LEN], temp_key[MAX_KEY_LEN], temp_value[MAX_VALUE_LEN];
+    sscanf(cmd, "SET #%s #%s #%s", temp_table_name, temp_key, temp_value);//reading the user values
+    
+    int table_index = hash(temp_table_name, MAX_TABLES);
+    int key_index = hash(temp_key, MAX_RECORDS_PER_TABLE);
+    
+    if (database[table_index] == NULL)
+        sprintf(cmd, "SET");
+    else if (strcmp(temp_value, "NULL") == strcmp(database[table_index]->values[key_index], "NULL"))//checking if the value in database is nul and the value from user is null
+            sprintf(cmd, "SET #%s", temp_table_name);
+    else if((strcmp(database[table_index]->table_name, temp_table_name) == 0))//setting the value
+    {
+        strcpy(database[table_index]->values[key_index], temp_value);
+        sprintf(cmd, "SET #%s #%s #%s", temp_table_name, temp_key, temp_value);
+        return 0;
+    }
+    
+    return 1;
+}
+
+
+/**
+ * @brief Processes commands from client shell and passes them to server_auth, server_get or server_set.
+ *
+ * @param sock The socket connected to the client.
+ * @param cmd The command received from the client.
+ * @return Returns 0 on success, -1 otherwise.
+ */
+int handle_command(int sock, char *cmd)
+{
+    
+    sprintf(buffer, "Processing command '%s'\n", cmd);
+    logger(server_log, buffer); // replace LOG commands with loggerger() calls
+    
+    char buf[MAX_CMD_LEN];
+    sscanf(cmd, "%s", buf);
+    
+    if(strcmp(buf, "AUTH") == 0)
+        server_auth(cmd);
+    else if(strcmp(buf, "GET") == 0)
+        server_get(cmd);
+    else if(strcmp(buf, "SET") == 0)
+        server_set(cmd);
+    else
+        return 1;
+    
+    // For now, just send back the command to the client.
+    sendall(sock, cmd, strlen(cmd));
+    sendall(sock, "\n", 1);
+    
+    return 0;
+}
+
+
+/**
+ * @brief Creates table for database
+ *
+ * This function creates tables for all the table names in the config file and hashes them according to their integer index in an array of struct hash_table pointers.
+ * @return Returns 0 on success, -1 otherwise.
+ */
+int create_tables()
+{
+    int i, j, table_index;
+    
+    for(i = 0; i < MAX_TABLES; i++)
+        database[i] = NULL;
+        
+    for(i = 0; i < params.num_tables; i++)
+    {
+        table_index = hash(params.table_names[i], MAX_TABLES);//making a hash key -> converting string table name to integer index
+        database[table_index] = (struct hash_table*) malloc(sizeof (struct hash_table));//making a hash_table pointer
+        strcpy(database[table_index]->table_name, params.table_names[i]);
+        
+        for(j = 0; j < MAX_RECORDS_PER_TABLE; j++)
+            strcpy(database[table_index]->values[j], "NULL");
+    }
+    
+    return 0;
+}
+
+/**
+ * @brief Deleting the tables.
+ *
+ */
+int delete_tables()
+{
+    int i;
+    
+    for(i = 0; i < MAX_TABLES; i++)
+        if(database[i] != NULL)
+        {
+            free(database[i]);
+            database[i] = NULL;
+        }
+    
+    return 0;
+}
+
+/**
+ * @brief Start the storage server.
+ *
+ * This is the main entry point for the storage server.  It reads the
+ * configuration file, starts listening on a port, and proccesses
+ * commands from clients.
+ */
+int main(int argc, char *argv[])
+{
+    char file_name[MAX_LOG_NAME] = "Server";
+    
+    switch (LOGGING)
+    {
+        case 0:
+            server_log = NULL;
+            break;
+            
+        case 1:
+            server_log = stdout;
+            break;
+            
+        case 2:
+            server_log = fopen(generate_logfile(file_name), "w");
+            break;
+    }
+    
+    // Process command line arguments.
+    // This program expects exactly one argument: the config file name.
+    assert(argc > 0);
+    if (argc != 2)
+    {
+        printf("Usage %s <config_file>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+    char *config_file = argv[1];
+    
+    // Read the config file.
+    
+    int status = read_config(config_file, &params);
+    if (status != 0)
+    {
+        printf("Error processing config file.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    
+    sprintf(buffer, "Server on %s:%d\n", params.server_host, params.server_port);
+    logger(server_log, buffer);
+    
+    // Create a socket.
+    int listensock = socket(PF_INET, SOCK_STREAM, 0);
+    if (listensock < 0)
+    {
+        printf("Error creating socket.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Allow listening port to be reused if defunct.
+    int yes = 1;
+    status = setsockopt(listensock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
+    if (status != 0)
+    {
+        printf("Error configuring socket.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Bind it to the listening port.
+    struct sockaddr_in listenaddr;
+    memset(&listenaddr, 0, sizeof listenaddr);
+    listenaddr.sin_family = AF_INET;
+    listenaddr.sin_port = htons(params.server_port);
+    inet_pton(AF_INET, params.server_host, &(listenaddr.sin_addr)); // bind to local IP address
+    status = bind(listensock, (struct sockaddr*) &listenaddr, sizeof listenaddr);
+    if (status != 0)
+    {
+        printf("Error binding socket.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Listen for connections.
+    status = listen(listensock, MAX_LISTENQUEUELEN);
+    if (status != 0)
+    {
+        printf("Error listening on socket.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    status = create_tables();
+    if (status != 0)
+    {
+        printf("Error creating database.\n");
+        delete_tables();
+        exit(EXIT_FAILURE);
+    }
+
+    // Listen loop.
+    int wait_for_connections = 1;
+    while (wait_for_connections)
+    {
+        // Wait for a connection.
+        struct sockaddr_in clientaddr;
+        socklen_t clientaddrlen = sizeof clientaddr;
+        int clientsock = accept(listensock, (struct sockaddr*)&clientaddr, &clientaddrlen);
+        if (clientsock < 0)
+        {
+            printf("Error accepting a connection.\n");
+            delete_tables();
+            exit(EXIT_FAILURE);
+        }
+        
+        
+        sprintf(buffer, "Got a connection from %s:%d.\n", inet_ntoa(clientaddr.sin_addr), clientaddr.sin_port);
+        logger(server_log, buffer);
+        
+        // Get commands from client.
+        int wait_for_commands = 1;
+        do
+        {
+            // Read a line from the client.
+            char cmd[MAX_CMD_LEN];
+            int status = recvline(clientsock, cmd, MAX_CMD_LEN);
+            if (status != 0)
+            {
+                // Either an error occurred or the client closed the connection.
+                wait_for_commands = 0;
+            }
+            else
+            {
+                // Handle the command from the client.
+                int status = handle_command(clientsock, cmd);
+                if (status != 0)
+                    wait_for_commands = 0; // Oops.  An error occured.
+            }
+        }
+        while (wait_for_commands);
+        
+        // Close the connection with the client.
+        close(clientsock);
+        
+        
+        sprintf(buffer, "Closed connection from %s:%d.\n", inet_ntoa(clientaddr.sin_addr), clientaddr.sin_port);
+        logger(server_log, buffer);
+    }
+    
+    // Stop listening for connections.
+    close(listensock);
+    
+    delete_tables();
+    fclose(server_log);
+    
+    return EXIT_SUCCESS;
+}
+
+

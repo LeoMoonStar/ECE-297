@@ -1,0 +1,20 @@
+cc -g -Wall -c server.c -o server.o
+server.c: In function 'populate_database':
+server.c:301:9: warning: embedded '\0' in format [-Wformat-contains-nul]
+server.c:301:9: warning: embedded '\0' in format [-Wformat-contains-nul]
+cc -g -Wall -c utils.c -o utils.o
+cc -g -Wall server.o utils.o -o server -lcrypt
+cc -g -Wall -c storage.c -o storage.o
+storage.c: In function 'storage_connect':
+storage.c:114:12: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+storage.c: In function 'storage_auth':
+storage.c:137:9: warning: return makes integer from pointer without a cast [enabled by default]
+storage.c:144:9: warning: return makes integer from pointer without a cast [enabled by default]
+storage.c:155:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+storage.c: In function 'storage_get':
+storage.c:201:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+storage.c: In function 'storage_set':
+storage.c:268:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+storage.c: In function 'storage_disconnect':
+storage.c:345:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+ar rcs libstorage.a storage.o utils.o

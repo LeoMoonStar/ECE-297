@@ -1,0 +1,25 @@
+cc -g -Wall -c storage.c -o storage.o
+storage.c: In function 'storage_connect':
+storage.c:131:12: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+storage.c: In function 'storage_auth':
+storage.c:156:9: warning: return makes integer from pointer without a cast [enabled by default]
+storage.c:163:9: warning: return makes integer from pointer without a cast [enabled by default]
+storage.c:174:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+storage.c: In function 'storage_get':
+storage.c:222:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+storage.c: In function 'storage_set':
+storage.c:293:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+storage.c: In function 'storage_query':
+storage.c:374:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+storage.c: In function 'storage_disconnect':
+storage.c:469:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+cc -g -Wall -c utils.c -o utils.o
+ar rcs libstorage.a storage.o utils.o
+cc -g -Wall -c server.c -o server.o
+cc -g -Wall server.o utils.o -o server -lcrypt
+cc -g -Wall -c client.c -o client.o
+cc -g -Wall client.o libstorage.a -o client -lcrypt
+cc -g -Wall -c encrypt_passwd.c -o encrypt_passwd.o
+cc -g -Wall encrypt_passwd.o utils.o -o encrypt_passwd -lcrypt
+make: `server' is up to date.
+make: `libstorage.a' is up to date.
